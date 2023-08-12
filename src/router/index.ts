@@ -7,17 +7,12 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         name: 'home',
-        component: Index
+        component: ModelEmbedCreator
     },
     {
-        path: '/embed/model/:modelId',
+        path: '/:modelId',
         name: 'embed-model',
         component: () => import('@/views/model/ModelEmbed.vue')
-    },
-    {
-        path: '/embed/create/model',
-        name: 'create-model-embed',
-        component: ModelEmbedCreator
     }
     /*  {
         path: '/about',

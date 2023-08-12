@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useClipboard } from '@vueuse/core'
+import { toReactive, useBrowserLocation, useClipboard } from '@vueuse/core'
 
 const width = ref(320)
 const height = ref(412)
@@ -8,7 +8,17 @@ const height = ref(412)
 const embedFrame = ref()
 const modelUrlText = ref()
 
-const iframeSrcUrl = computed(() => `/embed/model/${modelId.value}`)
+const location = useBrowserLocation()
+const {
+  origin
+} = toReactive(location)
+
+const iframeSrcUrl = computed(() => {
+  const _modelId = modelId.value
+  if (_modelId && _modelId >= 1) {
+    return `${origin}/${_modelId}`
+  }
+})
 
 const modelId = computed(() => {
   const _url: string | undefined = modelUrlText.value
@@ -63,7 +73,9 @@ function copySource() {
     <div :class="$style.EmbedPreviewWrapper">
       <div :class="$style.Chip">Preview</div>
       <div :class="$style.EmbedPreview" :style="{width:`${width}px`}">
-        <iframe :src="iframeSrcUrl" :width="width" :height="height"
+        <iframe :src="iframeSrcUrl"
+                :width="width"
+                :height="height"
                 ref="embedFrame"
                 allowtransparency="true"
                 style="border-radius:8px; overflow: hidden"/>
