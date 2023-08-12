@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-
-import Index from '@/views/Index.vue'
 import ModelEmbedCreator from '@/views/model/ModelEmbedCreator.vue'
 
 const routes: Array<RouteRecordRaw> = [
