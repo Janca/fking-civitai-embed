@@ -13,7 +13,9 @@ import Downloads from '@/components/ModelCard/Downloads.vue'
 const route = useRoute()
 const loading = ref(true)
 
-const modelId = computed(() => route.params.modelId)
+const modelId = computed(() => route.params.modelId as string)
+
+const isInvalid = computed(() => loading.value || (parseInt(modelId.value ?? 0)) <= 0)
 
 const modelData = ref()
 
@@ -81,7 +83,7 @@ onMounted(() => {
 <template>
   <a target="_parent"
      :href="`https://civitai.com/models/${modelId}`"
-     :class="[$style.Embed, {[$style.EmbedLoading]:loading}]">
+     :class="[$style.Embed, {[$style.EmbedLoading]:isInvalid}]">
     <div :class="$style.EmbedContent">
       <div :class="$style.PreviewImageWrapper">
         <div :class="$style.PreviewImage">

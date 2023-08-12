@@ -78,7 +78,7 @@ function copySource() {
                 :height="height"
                 ref="embedFrame"
                 allowtransparency="true"
-                style="border-radius:8px; overflow: hidden"/>
+                style="border-radius:8px; overflow: hidden; border:none; outline:none; -webkit-appearance:none"/>
         <button :class="$style.CopySourceBtn" @click="copySource">
           <span>Copy source code</span>
         </button>
