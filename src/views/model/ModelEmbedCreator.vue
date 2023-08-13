@@ -43,7 +43,6 @@ const enabledGallery = ref(false)
 
 const embedFrame = ref()
 const modelUrlInput = ref()
-const debouncedUrlInput = debouncedRef(modelUrlInput, 600)
 
 const loading = ref(false)
 
@@ -53,22 +52,23 @@ const {
 } = toReactive(location)
 
 const iframeSrcUrl = computed(() => {
-  const _modelId = modelId.value
-  const queries = new URLSearchParams({
-    inactive_ui_alpha: String(uiOpacityInput.value),
-    meta_scale: String(metadataScaleInput.value),
-    version_info: String(showVersionInfo.value),
-    version_stats: String(versionStats.value),
-    version_idx: String(versionIdx.value),
-    image_idx: String(imageIdx.value),
-    hide_user: String(hideUser.value),
-    hide_title: String(hideTitle.value),
-    hide_stats: String(hideStats.value),
-    hide_type: String(hideType.value),
-    refresh: String(refreshPeriodically.value)
-  })
+  const _modelId = modelId?.value
 
   if (_modelId && _modelId >= 1) {
+    const queries = new URLSearchParams({
+      inactive_ui_alpha: String(uiOpacityInput.value),
+      meta_scale: String(metadataScaleInput.value),
+      version_info: String(showVersionInfo.value),
+      version_stats: String(versionStats.value),
+      version_idx: String(versionIdx.value),
+      image_idx: String(imageIdx.value),
+      hide_user: String(hideUser.value),
+      hide_title: String(hideTitle.value),
+      hide_stats: String(hideStats.value),
+      hide_type: String(hideType.value),
+      refresh: String(refreshPeriodically.value)
+    })
+
     return `${origin}/${_modelId}?${queries}`
   }
 
@@ -76,9 +76,11 @@ const iframeSrcUrl = computed(() => {
 })
 
 const modelId = computed(() => {
-  const _url: string | undefined = debouncedUrlInput.value
+  const _url: string | undefined = modelUrlInput.value
   return _url ? parseInt(_url.match('https://civitai.com/models/(\\d+)')?.[1] || '-1') : -1
 })
+
+const debouncedModelEmbedUrl = debouncedRef(iframeSrcUrl, 600)
 
 const imageIdx = computed(() => (imageIdxInput.value ?? 1) - 1)
 const versionIdx = computed(() => (versionIdxInput.value ?? 0) - 1)
@@ -194,7 +196,7 @@ function copySource() {
       <div :class="$style.EmbedPreviewContent">
         <div :class="$style.Chip">Preview</div>
         <div :class="$style.EmbedPreview" :style="{width:`${width}px`}">
-          <iframe :src="iframeSrcUrl"
+          <iframe :src="debouncedModelEmbedUrl"
                   :width="width"
                   :height="height"
                   ref="embedFrame"
