@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { computed, Ref, ref } from 'vue'
+import { computed, onMounted, Ref, ref, watch } from 'vue'
 import { debouncedRef, toReactive, useBrowserLocation, useClipboard } from '@vueuse/core'
-import Code from '@/components/Code.vue'
 import FkSlider from '@/components/Input/FkSlider.vue'
 import FkTextField from '@/components/Input/FkTextField.vue'
 import { useCivitaiModelApi } from '@/composition/civitai'
 import FkSwitch from '@/components/Input/FkSwitch.vue'
 import FkSwitchGroup from '@/components/Input/FkSwitchGroup.vue'
+import Code from '@/components/Code.vue'
 
 const width = ref(320)
 const height = ref(412)
@@ -25,13 +25,19 @@ const uiOpacityInput = computed({
   set: (value: number | string) => _uiOpacityInput.value = typeof value == 'number' ? value : parseFloat(value)
 })
 
-const showVersionInfo = ref(false)
+const _showVersionInfo = ref(false)
+const showVersionInfo: Ref<boolean> = computed({
+  get: () => _showVersionInfo.value && !hideTitle.value,
+  set: (value: boolean) => _showVersionInfo.value = value
+})
+
 const _versionStats = ref(false)
 const versionStats: Ref<boolean> = computed({
   get: () => _versionStats.value && !hideStats.value,
   set: (value: boolean) => _versionStats.value = value
 })
 
+const reducedMotion = ref(false)
 const refreshPeriodically = ref(false)
 
 const hideUser = ref(false)
@@ -56,6 +62,7 @@ const iframeSrcUrl = computed(() => {
 
   if (_modelId && _modelId >= 1) {
     const queries = new URLSearchParams({
+      reduced_motion: String(reducedMotion.value),
       inactive_ui_alpha: String(uiOpacityInput.value),
       meta_scale: String(metadataScaleInput.value),
       version_info: String(showVersionInfo.value),
@@ -75,23 +82,28 @@ const iframeSrcUrl = computed(() => {
   return undefined
 })
 
+const versionId = computed(() => {
+  const _url: string | undefined = modelUrlInput.value
+  return _url ? parseInt(_url.match('https://civitai.com/models.+modelVersionId=(\\d+)')?.[1] || '-1') : -1
+})
+
 const modelId = computed(() => {
   const _url: string | undefined = modelUrlInput.value
   return _url ? parseInt(_url.match('https://civitai.com/models/(\\d+)')?.[1] || '-1') : -1
 })
 
-const debouncedModelEmbedUrl = debouncedRef(iframeSrcUrl, 600)
+const debouncedModelEmbedUrl = debouncedRef(iframeSrcUrl, 300)
 
 const imageIdx = computed(() => (imageIdxInput.value ?? 1) - 1)
 const versionIdx = computed(() => (versionIdxInput.value ?? 0) - 1)
 
-const civitaiModel = useCivitaiModelApi(modelId)
-
 const {
   isFetching,
+  versions,
   versionCount,
-  primarySFWModelImageCount
-} = civitaiModel
+  selectedModel,
+  selectedModelImageCount
+} = useCivitaiModelApi(modelId)
 
 const source = ref('')
 const {
@@ -105,31 +117,51 @@ function copySource() {
   }
 }
 
+onMounted(() => {
+  watch(selectedModel, () => {
+    const _versionId = versionId.value ?? -1
+    const _selectedVersionIdx = _versionId !== -1 ? versions.value?.findIndex((_v: any) => _v.id == _versionId) ?? -1 : -1
+
+    if (_selectedVersionIdx !== -1) {
+      versionIdxInput.value = _selectedVersionIdx + 1
+    } else {
+      versionIdxInput.value = 1
+    }
+  })
+})
+
 </script>
 
 <template>
   <div :class="$style.EmbedWrapper">
     <div :class="$style.EmbedCreatorWrapper">
-      <div style="margin-bottom:0.5rem">
-        <h1 style="margin-top:0">CIVIT<span style="color:#1971c2">AI</span> Embed Card</h1>
-        <h2>Introduction</h2>
-        <div style="font-weight:500">
-          <p>
-            Create an embed directly to your CivitAI model on any website allowing
-            <Code>iframe</Code>.
-            Show off your model with an eye-catching, zero-effort card element.
-          </p>
-          <p>
-            To begin, enter a valid, SFW model URL. Then use the <Code>Copy source code</Code>
-            button to copy the <Code>iframe</Code> HTML to clipboard.
-          </p>
+      <div style="margin-bottom:0.5rem; max-width:512px; margin-left:auto;">
+        <div>
+          <h1 style="margin-top:0">CIVIT<span style="color:#1971c2">AI</span> Embed Card</h1>
+          <h2>Introduction</h2>
+          <div style="font-weight:500">
+            <p>
+              Create an embed directly to your CivitAI model on any website allowing
+              <Code>iframe</Code>.
+              Show off your model with an eye-catching, zero-effort card element.
+            </p>
+            <p>
+              To begin, enter a valid, SFW model URL. Then use the <Code>Copy source code</Code>
+              button to copy the <Code>iframe</Code> HTML to clipboard.
+            </p>
+            <p>
+              Hosted on GitHub pages, and using the API provided by CivitAI directly from within the browser,
+              the embedded <Code>iframe</Code> has zero-dependencies between you and the data you want.
+            </p>
+          </div>
         </div>
-
-        <FkTextField v-model="modelUrlInput">
-          <template #label>
-            <h2 style="margin-bottom:0">Model URL</h2>
-          </template>
-        </FkTextField>
+        <div>
+          <FkTextField v-model="modelUrlInput">
+            <template #label>
+              <h2 style="margin-bottom:0; font-size:1.5rem">Model URL</h2>
+            </template>
+          </FkTextField>
+        </div>
         <div>
           <h2>Configure</h2>
           <FkSlider label="Model Version"
@@ -138,7 +170,7 @@ function copySource() {
                     :disabled="isFetching"
                     v-model="versionIdxInput"/>
           <FkSlider label="Model Preview Image"
-                    :min="1" :max="Math.max(1, primarySFWModelImageCount)"
+                    :min="1" :max="Math.max(1, selectedModelImageCount)"
                     value-width="min(72px, max(32px,10%))"
                     :disabled="isFetching"
                     v-model="imageIdxInput"/>
@@ -170,23 +202,30 @@ function copySource() {
                     v-model="uiOpacityInput"/>
 
 
-          <div :class="[$style.HideFeatures]">
+          <div :class="[$style.Features]">
             <h3>Enable Features</h3>
             <FkSwitchGroup>
               <FkSwitch v-model="refreshPeriodically" :disabled="isFetching" label="Refresh Periodically"/>
-              <FkSwitch v-model="showVersionInfo" :disabled="isFetching" label="Show Version Information"/>
+              <FkSwitch v-model="showVersionInfo" :disabled="hideTitle || isFetching" label="Show Version Information"/>
               <FkSwitch v-model="versionStats" :disabled="hideStats || isFetching" label="Use Version Statistics"/>
               <!--          <FkSwitch v-model="enabledGallery" label="Image Gallery"/>-->
             </FkSwitchGroup>
           </div>
 
-          <div :class="[$style.HideFeatures]">
+          <div :class="[$style.Features]">
             <h3>Hide Features</h3>
             <FkSwitchGroup>
-              <FkSwitch v-model="hideUser" :disabled="isFetching" label="Hide User Information"/>
-              <FkSwitch v-model="hideTitle" :disabled="isFetching" label="Hide Title Information"/>
-              <FkSwitch v-model="hideType" :disabled="isFetching" label="Hide Type Information"/>
               <FkSwitch v-model="hideStats" :disabled="isFetching" label="Hide Statistics"/>
+              <FkSwitch v-model="hideTitle" :disabled="isFetching" label="Hide Title"/>
+              <FkSwitch v-model="hideType" :disabled="isFetching" label="Hide Type"/>
+              <FkSwitch v-model="hideUser" :disabled="isFetching" label="Hide User"/>
+            </FkSwitchGroup>
+          </div>
+
+          <div :class="[$style.Features]">
+            <h3>Accessibility</h3>
+            <FkSwitchGroup>
+              <FkSwitch v-model="reducedMotion" :disabled="isFetching" label="Reduced Motion"/>
             </FkSwitchGroup>
           </div>
         </div>
@@ -229,6 +268,12 @@ function copySource() {
   .EmbedWrapper {
     flex-flow: column nowrap;
 
+    .EmbedCreatorWrapper {
+      > div {
+        max-width: unset !important;
+      }
+    }
+
     .CreatorSection {
       top: unset;
       position: unset;
@@ -243,9 +288,6 @@ function copySource() {
   color: #c1c2c5;
 
   width: 100%;
-
-  margin-left: auto;
-  max-width: 896px;
 }
 
 .CreatorSection {
@@ -257,6 +299,16 @@ function copySource() {
 
   height: min-content;
   width: 100%;
+}
+
+.CreatorNav {
+  ul {
+    list-style: none;
+
+    li {
+      display: inline-flex;
+    }
+  }
 }
 
 .EmbedPreviewContent {
@@ -343,13 +395,13 @@ function copySource() {
   }
 }
 
-.HideFeatures {
+.Features {
   h3 {
     margin-bottom: 0;
   }
 
   h3 + * {
-    margin-top: 0;
+    margin-top: 0.25rem;
   }
 }
 </style>

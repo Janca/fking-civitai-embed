@@ -1,0 +1,22 @@
+@use 'variables' as v;
+@use 'sass:meta';
+
+:root {
+  --font-family-body: #{meta.inspect(v.$font-family-body)};
+  --font-family-mono: #{meta.inspect(v.$font-family-mono)};
+
+  --font-size-body: #{v.$font-size-body};
+  --font-size-mono: #{v.$font-size-mono};
+
+  --transition-duration: #{v.$transition-duration};
+  --transition-timing-fn: #{v.$transition-timing-fn};
+
+  --theme-primary: #{v.$theme-primary};
+  --theme-secondary: #{v.$theme-secondary};
+
+  --theme-primary-darker: #{v.$theme-primary-darker};
+  --theme-secondary-darker: #{v.$theme-secondary-darker};
+
+  --theme-primary-lighter: #{v.$theme-primary-lighter};
+  --theme-secondary-lighter: #{v.$theme-secondary-lighter};
+}

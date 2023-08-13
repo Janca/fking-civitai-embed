@@ -24,6 +24,7 @@ const hideType = useBoolean(route.query.hide_type as string | null)
 const hideUser = useBoolean(route.query.hide_user as string | null)
 const hideStatistics = useBoolean(route.query.hide_stats as string | null)
 const refreshEnabled = useBoolean(route.query.refresh as string | null)
+const reducedMotion = useBoolean(route.query.reduced_motion as string | null)
 
 const showVersionInfo = useBoolean(route.query.version_info as string | null)
 const versionStats = useBoolean(route.query.version_stats as string | null)
@@ -43,11 +44,11 @@ const {
 
   execute: refresh,
 
-  modelName,
-  modelType,
+  name,
+  type,
 
-  modelUploader,
-  modelUploaderProfileImage,
+  creatorName,
+  creatorAvatarImage,
 
   versions,
 
@@ -57,10 +58,11 @@ const {
   comments,
   downloads,
 
-  primaryModel,
-  primarySFWModelImages,
-  primarySFWModelPreviewImage,
-  primarySFWModelImageCount
+  selectedModel,
+  selectedModelUrl,
+  selectedModelImages,
+  selectedModelPreviewImageUrl,
+  selectedModelImageCount
 } = civitaiModel
 
 const imageLoading = ref(true)
@@ -71,7 +73,7 @@ onMounted(() => {
   if (refreshEnabled) {
     const {
       pause
-    } = useIntervalFn(() => refresh(), 120_000)
+    } = useIntervalFn(refresh, 120_000)
   }
 })
 
@@ -83,35 +85,42 @@ const computedStyle = computed(() => {
   }
 })
 
+const computedClasses = computed(() => {
+  return {
+    [style.EmbedLoading]: loading.value,
+    [style.ReducedMotion]: reducedMotion.value
+  }
+})
+
 </script>
 
 <template>
   <a target="_blank"
      :style="computedStyle"
-     :href="`https://civitai.com/models/${modelId}`"
-     :class="[$style.Embed, {[$style.EmbedLoading]:loading}]">
+     :href="selectedModelUrl"
+     :class="[$style.Embed, computedClasses]">
     <div :class="$style.EmbedContent">
       <div :class="$style.PreviewImageWrapper">
         <div :class="$style.PreviewImage">
           <img alt="Model preview image"
-               :src="primarySFWModelPreviewImage"
+               :src="selectedModelPreviewImageUrl"
                @loadstart="imageLoading = true"
                @load="imageLoading = false"/>
         </div>
       </div>
       <div :class="$style.ModelTypeWrapper" v-if="!hideType">
         <div :class="$style.ModelType">
-          {{ modelType.replace('TextualInversion', 'Embedding') }}
+          {{ type.replace('TextualInversion', 'Embedding') }}
         </div>
       </div>
       <div :class="$style.ModelMeta">
         <div :class="$style.Uploader" v-if="!hideUser">
           <div :class="$style.AvatarImage">
-            <img alt="User profile image" :src="modelUploaderProfileImage"/>
+            <img alt="User profile image" :src="creatorAvatarImage"/>
           </div>
-          <div v-text="modelUploader"/>
+          <div v-text="creatorName"/>
         </div>
-        <div :class="$style.ModelName" v-text="modelName" v-if="!hideTitle"/>
+        <div :class="$style.ModelName" v-text="name" v-if="!hideTitle"/>
         <div :class="$style.ModelStats" v-if="!hideStatistics">
           <div :class="$style.StatsWrapper">
             <Rating :rating="rating" :ratings="ratings"/>
@@ -202,10 +211,20 @@ const computedStyle = computed(() => {
   overflow: hidden;
 
   &:hover {
-    --ui-inactive-alpha: 1.10;
+    --ui-inactive-alpha: 1.0;
 
     .PreviewImage img {
       transform: scale(1.05);
+    }
+  }
+}
+
+.ReducedMotion {
+  .EmbedContent {
+    &:hover {
+      .PreviewImage img {
+        transform: unset;
+      }
     }
   }
 }

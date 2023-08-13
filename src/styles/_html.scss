@@ -1,0 +1,15 @@
+@use "css-variables" as v;
+
+html, html body {
+  font-family: v.$font-family-body;
+  font-size: v.$font-size-body;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  line-height: 1.55;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}

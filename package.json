@@ -8,6 +8,7 @@
     "build:ghpages": "npm run build && shx cp docs/index.html docs/404.html"
   },
   "dependencies": {
+    "normalize.css": "^8.0.1",
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",

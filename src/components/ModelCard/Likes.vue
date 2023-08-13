@@ -10,7 +10,7 @@ const props = defineProps<{
 
 <template>
   <StatsWrapper :stat="props.likes ?? 0">
-    <div :class="[$style.Heart, {[$style.HeartActivated]:props.likes >= 0}]">
+    <div>
       <svg xmlns="http://www.w3.org/2000/svg"
            width="100%"
            height="100%"

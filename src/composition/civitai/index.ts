@@ -3,7 +3,7 @@ import { computed, ref, Ref } from 'vue'
 
 export function useCivitaiModelApi(
     modelId: Ref<number>,
-    previewImageIndex: Ref<number> = ref(0),
+    selectedModelPreviewImageIndex: Ref<number> = ref(0),
     versionIndex: Ref<number> = ref(0),
     showVersionInfo: Ref<boolean> = ref(false),
     versionStats: Ref<boolean> = ref(false),
@@ -22,14 +22,14 @@ export function useCivitaiModelApi(
         execute,
         isFetching,
         error,
-        data: modelData
+        data
     } = useFetch<{ data: Ref<object> }>(
         modelApiRequestUrl as Ref<string>,
         {
             immediate,
             refetch: true,
             timeout: 10_000,
-            async beforeFetch({ url, options, cancel }) {
+            beforeFetch({ url, options, cancel }) {
                 if (url == null) {
                     cancel()
                 }
@@ -37,25 +37,19 @@ export function useCivitaiModelApi(
         }
     ).json()
 
-    const modelName = computed(() => {
-        const _name = modelData.value?.name
-        if (showVersionInfo.value) {
-            const _versionInfo = primaryModel.value?.name
-            if (_versionInfo != null) {
-                return `${_name} - ${_versionInfo}`
-            }
-        }
-
-        return _name
+    const name = computed(() => {
+        const _name = data.value?.name
+        const _versionInfo = showVersionInfo.value ? selectedModel.value?.name : null
+        return _versionInfo ? `${_name} - ${_versionInfo}` : _name
     })
 
-    const modelUploader = computed(() => modelData.value?.creator?.username)
-    const modelUploaderProfileImage = computed(() => modelData.value?.creator?.image)
+    const creatorName = computed(() => data.value?.creator?.username)
+    const creatorAvatarImage = computed(() => data.value?.creator?.image)
 
-    const versions = computed(() => modelData.value?.modelVersions)
-    const modelVersionCount = computed(() => versions.value?.length ?? 0)
+    const versions = computed(() => data.value?.modelVersions)
+    const versionCount = computed(() => versions.value?.length ?? 0)
 
-    const statsTarget = computed(() => versionStats.value ? primaryModel?.value : modelData.value)
+    const statsTarget = computed(() => versionStats.value ? selectedModel?.value : data.value)
 
     const rating = computed(() => statsTarget.value?.stats.rating ?? -1)
     const ratings = computed(() => statsTarget.value?.stats.ratingCount ?? 0)
@@ -64,14 +58,20 @@ export function useCivitaiModelApi(
     const comments = computed(() => statsTarget.value?.stats?.commentCount ?? 0)
     const downloads = computed(() => statsTarget.value?.stats?.downloadCount ?? 0)
 
-    const modelType = computed(() => modelData.value?.type ?? 'UNK')
+    const type = computed(() => data.value?.type ?? 'UNK')
 
-    const primaryModel = computed(() => versions.value?.[versionIndex.value])
+    const selectedModel = computed(() => versions.value?.[versionIndex.value])
 
-    const primaryModelImages: Ref<[any] | undefined> = computed(() => primaryModel.value?.images)
-    const primarySFWModelImages = computed(() => primaryModelImages.value?.filter(_image => _image.nsfw == 'None') ?? [])
-    const primarySFWModelImageCount = computed(() => primarySFWModelImages.value?.length ?? 0)
-    const primarySFWModelPreviewImage = computed(() => primarySFWModelImages.value?.[previewImageIndex.value]?.url?.replace(/\/width=\d+/, ''))
+    const selectedModelUrl = computed(() => {
+        const _selectedModel = selectedModel.value
+        return _selectedModel ? `https://civitai.com/models/${_selectedModel.modelId}?modelVersionId=${_selectedModel.id}` : null
+    })
+
+    const _selectedModelImages: Ref<[any] | undefined> = computed(() => selectedModel.value?.images)
+    const selectedModelImages = computed(() => _selectedModelImages.value?.filter(_image => _image.nsfw == 'None') ?? [])
+    const selectedModelImageCount = computed(() => selectedModelImages.value?.length ?? 0)
+
+    const selectedModelPreviewImageUrl = computed(() => selectedModelImages.value?.[selectedModelPreviewImageIndex.value]?.url?.replace(/\/width=\d+/, ''))
 
     return {
         abort,
@@ -82,27 +82,28 @@ export function useCivitaiModelApi(
         execute,
         isFetching,
 
-        modelData,
+        data,
 
-        modelName,
-        modelType,
+        name,
+        type,
 
-        modelUploader,
-        modelUploaderProfileImage,
+        creatorName,
+        creatorAvatarImage,
 
         versions,
-        versionCount: modelVersionCount,
+        versionCount,
 
-        rating: rating,
-        ratings: ratings,
-        likes: likes,
-        comments: comments,
-        downloads: downloads,
+        rating,
+        ratings,
+        likes,
+        comments,
+        downloads,
 
-        primaryModel,
-        primarySFWModelImages,
-        primarySFWModelPreviewImage,
-        primarySFWModelImageCount,
-        previewImageIndex
+        selectedModel,
+        selectedModelUrl,
+        selectedModelImages,
+        selectedModelPreviewImageUrl,
+        selectedModelImageCount,
+        selectedModelPreviewImageIndex
     }
 }

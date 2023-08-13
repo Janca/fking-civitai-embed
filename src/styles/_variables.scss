@@ -1,0 +1,19 @@
+@use 'sass:color';
+
+$font-family-body: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+$font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+$font-size-body: 12pt;
+$font-size-mono: $font-size-body;
+
+$transition-duration: 0.3s;
+$transition-timing-fn: ease;
+
+$theme-primary: #1971c2;
+$theme-secondary: $theme-primary;
+
+$theme-primary-darker: color.scale($theme-primary, $lightness: -15%);
+$theme-secondary-darker: color.scale($theme-secondary, $lightness: -15%);
+
+$theme-primary-lighter: color.scale($theme-primary, $lightness: 15%);
+$theme-secondary-lighter: color.scale($theme-secondary, $lightness: 15%);
