@@ -13,6 +13,18 @@ const height = ref(412)
 const imageIdxInput = ref(1)
 const versionIdxInput = ref(1)
 
+const _metadataScaleInput = ref(1.0)
+const metadataScaleInput = computed({
+  get: () => _metadataScaleInput.value.toFixed(2),
+  set: (value: number | string) => _metadataScaleInput.value = typeof value == 'number' ? value : parseFloat(value)
+})
+
+const _uiOpacityInput = ref(1.0)
+const uiOpacityInput = computed({
+  get: () => _uiOpacityInput.value.toFixed(2),
+  set: (value: number | string) => _uiOpacityInput.value = typeof value == 'number' ? value : parseFloat(value)
+})
+
 const showVersionInfo = ref(false)
 const _versionStats = ref(false)
 const versionStats: Ref<boolean> = computed({
@@ -43,6 +55,8 @@ const {
 const iframeSrcUrl = computed(() => {
   const _modelId = modelId.value
   const queries = new URLSearchParams({
+    inactive_ui_alpha: String(uiOpacityInput.value),
+    meta_scale: String(metadataScaleInput.value),
     version_info: String(showVersionInfo.value),
     version_stats: String(versionStats.value),
     version_idx: String(versionIdx.value),
@@ -51,7 +65,7 @@ const iframeSrcUrl = computed(() => {
     hide_title: String(hideTitle.value),
     hide_stats: String(hideStats.value),
     hide_type: String(hideType.value),
-    refresh: '0'
+    refresh: String(refreshPeriodically.value)
   })
 
   if (_modelId && _modelId >= 1) {
@@ -126,6 +140,7 @@ function copySource() {
                     value-width="min(72px, max(32px,10%))"
                     :disabled="isFetching"
                     v-model="imageIdxInput"/>
+
           <FkSlider label="Width"
                     :min="128" :max="1024"
                     :step="4" unit="px"
@@ -139,9 +154,22 @@ function copySource() {
                     :disabled="isFetching"
                     v-model="height"/>
 
+          <FkSlider label="UI Scale"
+                    :min="0.25" :max="2.0"
+                    :step="0.05"
+                    value-width="min(72px, max(32px,10%))"
+                    :disabled="isFetching"
+                    v-model="metadataScaleInput"/>
+          <FkSlider label="Inactive UI Opacity"
+                    :min="0.0" :max="1.0"
+                    :step="0.05"
+                    value-width="min(72px, max(32px,10%))"
+                    :disabled="isFetching"
+                    v-model="uiOpacityInput"/>
+
 
           <div :class="[$style.HideFeatures]">
-            <h3>Enabled Features</h3>
+            <h3>Enable Features</h3>
             <FkSwitchGroup>
               <FkSwitch v-model="refreshPeriodically" :disabled="isFetching" label="Refresh Periodically"/>
               <FkSwitch v-model="showVersionInfo" :disabled="isFetching" label="Show Version Information"/>

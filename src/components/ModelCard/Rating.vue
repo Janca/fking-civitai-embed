@@ -29,7 +29,7 @@ const strRatings = computed(() => props.ratings ?? 0)
 
   align-items: center;
 
-  font-size: 3.75vmin;
+  font-size:  calc(3.75vmin * var(--ui-scale, 1));
   font-weight: 500;
 }
 
@@ -37,7 +37,7 @@ const strRatings = computed(() => props.ratings ?? 0)
   display: flex;
   flex-flow: row nowrap;
 
-  margin-right: 1.5625vmin;
+  margin-right:  calc(1.5625vmin * var(--ui-scale, 1));
 }
 
 .Activated {

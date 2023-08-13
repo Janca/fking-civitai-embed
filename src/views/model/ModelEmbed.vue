@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useCssModule } from 'vue'
 import { useRoute } from 'vue-router'
 
 import Rating from '@/components/ModelCard/Rating.vue'
@@ -13,9 +13,11 @@ import { useBoolean } from '@/composition'
 
 const route = useRoute()
 
-const modelId = computed(() => parseInt(route.params.modelId as string ?? 0))
-const versionIndex = computed(() => parseInt(route.query.version_idx as string ?? 0))
-const previewImageIndex = computed(() => parseInt(route.query.image_idx as string ?? 0))
+const modelId = computed(() => parseInt(route.params.modelId as string ?? '0'))
+const versionIndex = computed(() => parseInt(route.query.version_idx as string ?? '0'))
+const previewImageIndex = computed(() => parseInt(route.query.image_idx as string ?? '0'))
+const uiScale = computed(() => parseFloat(route.query.meta_scale as string ?? '1.0'))
+const uiInactiveAlpha = computed(() => parseFloat(route.query.inactive_ui_alpha as string ?? '1.0'))
 
 const hideTitle = useBoolean(route.query.hide_title as string | null)
 const hideType = useBoolean(route.query.hide_type as string | null)
@@ -47,7 +49,7 @@ const {
   modelUploader,
   modelUploaderProfileImage,
 
-  modelVersions,
+  versions,
 
   rating,
   ratings,
@@ -73,10 +75,19 @@ onMounted(() => {
   }
 })
 
+const style = useCssModule()
+const computedStyle = computed(() => {
+  return {
+    ['--ui-inactive-alpha']: uiInactiveAlpha.value ?? 1.0,
+    ['--ui-scale']: uiScale.value ?? 1.0
+  }
+})
+
 </script>
 
 <template>
   <a target="_blank"
+     :style="computedStyle"
      :href="`https://civitai.com/models/${modelId}`"
      :class="[$style.Embed, {[$style.EmbedLoading]:loading}]">
     <div :class="$style.EmbedContent">
@@ -167,11 +178,11 @@ onMounted(() => {
 .Loader {
   position: relative;
 
-  width: 16vmin;
-  height: 16vmin;
+  width: calc(16vmin * var(--ui-scale, 1));
+  height: calc(16vmin * var(--ui-scale, 1));
 
   border-radius: 50%;
-  border: 1.75vmin solid rgba(255, 255, 255, 0.31);
+  border: calc(1.75vmin * var(--ui-scale, 1)) solid rgba(255, 255, 255, 0.31);
   border-left-color: #1971c2;
 
   animation: loader 1.2s linear infinite;
@@ -187,10 +198,12 @@ onMounted(() => {
 
   color: white;
 
-  border-radius: 2.5vmin;
+  border-radius: calc(2.5vmin * var(--ui-scale, 1));
   overflow: hidden;
 
   &:hover {
+    --ui-inactive-alpha: 1.10;
+
     .PreviewImage img {
       transform: scale(1.05);
     }
@@ -208,7 +221,7 @@ onMounted(() => {
     width: 100%;
     height: 100%;
 
-    background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.75)) transparent;
+    background: linear-gradient(transparent 60%, rgba(0, 0, 0, min(0.75, var(--ui-inactive-alpha, 1.0)))) transparent;
   }
 }
 
@@ -231,11 +244,16 @@ onMounted(() => {
   }
 }
 
+.ModelTypeWrapper, .ModelMeta {
+  transition: opacity 0.3s ease;
+  opacity: var(--ui-inactive-alpha, 1.0);
+}
+
 .ModelTypeWrapper {
   position: absolute;
   top: 0;
 
-  padding: 2.5vmin;
+  padding: calc(2.5vmin * var(--ui-scale, 1));
 }
 
 .ModelType {
@@ -244,12 +262,12 @@ onMounted(() => {
   align-items: center;
 
   font-weight: 500;
-  font-size: 3.75vmin;
+  font-size: calc(3.75vmin * var(--ui-scale, 1));
 
-  height: 8.125vmin;
-  padding: 0 3.333vmin;
+  height: calc(8.125vmin * var(--ui-scale, 1));
+  padding: 0 calc(3.333vmin * var(--ui-scale, 1));
 
-  border-radius: 10vmin;
+  border-radius: calc(10vmin * var(--ui-scale, 1));
   border: 1px solid transparent;
   background: none rgba(0, 0, 0, 0.31);
 }
@@ -258,27 +276,27 @@ onMounted(() => {
   display: flex;
   flex-flow: column nowrap;
 
-  gap: 3.125vmin;
+  gap: calc(3.125vmin * var(--ui-scale, 1));
   width: 100%;
 
   position: absolute;
   bottom: 0;
 
-  padding: 2.5vmin;
+  padding: calc(2.5vmin * var(--ui-scale, 1));
 }
 
 .Uploader {
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  gap: 2.5vmin;
+  gap: calc(2.5vmin * var(--ui-scale, 1));
 
   font-weight: 500;
-  font-size: 4.375vmin;
+  font-size: calc(4.375vmin * var(--ui-scale, 1));
 }
 
 .ModelName {
-  font-size: 6.25vmin;
+  font-size: calc(6.25vmin * var(--ui-scale, 1));
   font-weight: 700;
 }
 
@@ -286,13 +304,13 @@ onMounted(() => {
   display: flex;
   flex-flow: row nowrap;
 
-  gap: 1.25vmin;
+  gap: calc(1.25vmin * var(--ui-scale, 1));
   width: 100%;
 }
 
 .AvatarImage {
-  width: 10vmin;
-  height: 10vmin;
+  width: calc(10vmin * var(--ui-scale, 1));
+  height: calc(10vmin * var(--ui-scale, 1));
 
   display: flex;
   align-items: center;
@@ -300,7 +318,7 @@ onMounted(() => {
 
   overflow: hidden;
 
-  border-radius: 2.5vmin;
+  border-radius: calc(2.5vmin * var(--ui-scale, 1));
 
   img {
     object-fit: cover;
@@ -311,18 +329,18 @@ onMounted(() => {
 
 .StatsWrapper {
   width: min-content;
-  height: 6.25vmin;
+  height: calc(6.25vmin * var(--ui-scale, 1));
 
   display: flex;
   align-items: center;
 
   padding: {
-    right: 1.5625vmin;
-    left: 0.9375vmin;
+    right: calc(1.5625vmin * var(--ui-scale, 1));
+    left: calc(0.9375vmin * var(--ui-scale, 1));
   };
 
   background: none rgba(0, 0, 0, 0.31);
-  border-radius: 1.25vmin;
+  border-radius: calc(1.25vmin * var(--ui-scale, 1));
   line-height: 1;
 }
 

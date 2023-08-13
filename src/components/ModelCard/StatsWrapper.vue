@@ -31,7 +31,7 @@ const computedState = computed(() => abbreviate(props.stat ?? 0, 1).toString().t
 
   align-items: center;
 
-  font-size: 3.75vmin;
+  font-size:  calc(3.75vmin * var(--ui-scale, 1));
   font-weight: 500;
 }
 
@@ -40,10 +40,10 @@ const computedState = computed(() => abbreviate(props.stat ?? 0, 1).toString().t
   align-items: center;
 
   svg {
-    width: 4.375vmin;
-    height: 4.375vmin;
+    width:  calc(4.375vmin * var(--ui-scale, 1));
+    height:  calc(4.375vmin * var(--ui-scale, 1));
   }
 
-  margin-right: 1.5625vmin;
+  margin-right:  calc(1.5625vmin * var(--ui-scale, 1));
 }
 </style>

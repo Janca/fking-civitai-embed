@@ -20,7 +20,7 @@
 .Star {
   display: flex;
 
-  width: 4.375vmin;
-  height: 4.375vmin;
+  width:  calc(4.375vmin * var(--ui-scale, 1));
+  height:  calc(4.375vmin * var(--ui-scale, 1));
 }
 </style>
