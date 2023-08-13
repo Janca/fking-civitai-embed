@@ -221,7 +221,9 @@ const computedStyle = computed(() => {
     width: 100%;
     height: 100%;
 
-    background: linear-gradient(transparent 60%, rgba(0, 0, 0, min(0.75, var(--ui-inactive-alpha, 1.0)))) transparent;
+    transition: opacity 0.3s ease;
+    opacity: var(--ui-inactive-alpha, 1.0);
+    background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.75)) transparent;
   }
 }
 
