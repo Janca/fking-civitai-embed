@@ -1,81 +1,59 @@
 <script lang="ts" setup>
 
-import { computed, onMounted, ref, Ref } from 'vue'
-import { useIntervalFn } from '@vueuse/core'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getProperty } from 'dot-prop'
 
 import Rating from '@/components/ModelCard/Rating.vue'
 import Likes from '@/components/ModelCard/Likes.vue'
 import Comments from '@/components/ModelCard/Comments.vue'
 import Downloads from '@/components/ModelCard/Downloads.vue'
+import { useCivitaiModelApi } from '@/composition/civitai'
+import { useIntervalFn } from '@vueuse/core'
+import { useBoolean } from '@/composition'
 
 const route = useRoute()
-const loading = ref(true)
 
-const modelId = computed(() => route.params.modelId as string)
+const modelId = computed(() => parseInt(route.params.modelId as string ?? 0))
+const previewImageIndex = computed(() => parseInt(route.query.image_idx as string ?? 0))
 
-const isInvalid = computed(() => loading.value || (parseInt(modelId.value ?? 0)) <= 0)
+const hideType = useBoolean(route.query.hide_type as string | null)
+const hideUser = useBoolean(route.query.hide_user as string | null)
+const hideStatistics = useBoolean(route.query.hide_stats as string | null)
+const refreshEnabled = useBoolean(route.query.refresh as string | null)
 
-const modelData = ref()
+const civitaiModel = useCivitaiModelApi(modelId, previewImageIndex, true)
+const {
+  error,
+  isFetching,
 
-const modelName = computed(() => getProperty(modelData.value, 'name'))
+  execute: refresh,
 
-const modelUploader = computed(() => getProperty(modelData.value, 'creator.username'))
-const modelUploaderProfileImage = computed(() => getProperty(modelData.value, 'creator.image'))
+  modelName,
+  modelType,
 
-const modelVersions = computed(() => getProperty(modelData.value, 'modelVersions'))
+  modelUploader,
+  modelUploaderProfileImage,
 
-const modelRating = computed(() => getProperty(modelData.value, 'stats.rating', -1) as number)
-const modelRatings = computed(() => getProperty(modelData.value, 'stats.ratingCount', 0) as number)
+  modelVersions,
 
-const modelLikes = computed(() => getProperty(modelData.value, 'stats.favoriteCount', 0) as number)
-const modelComments = computed(() => getProperty(modelData.value, 'stats.commentCount', 0) as number)
-const modelDownloads = computed(() => getProperty(modelData.value, 'stats.downloadCount', 0) as number)
+  modelRating,
+  modelRatings,
+  modelLikes,
+  modelComments,
+  modelDownloads,
 
-const modelType = computed(() => getProperty(modelData.value, 'type', 'UNK') as string)
-
-const primaryModel = computed(() => {
-  const _modelVersions = modelVersions.value
-  return _modelVersions ? _modelVersions[0] : undefined
-})
-
-const primaryModelImages: Ref<[any] | undefined> = computed(() => getProperty(primaryModel.value, 'images'))
-const primaryModelPreviewImage = computed(() => {
-  const _images = primaryModelImages.value
-  if (_images == undefined) {
-    return undefined
-  }
-
-  for (const _image of _images) {
-    if (_image['nsfw'] == 'None') {
-      return _image.url
-    }
-  }
-
-  return undefined
-})
-
-function fetchModelData() {
-  loading.value = true
-  const _modelId = modelId.value
-
-  if (_modelId && parseInt(_modelId as string ?? 0) >= 0) {
-    return fetch(`https://civitai.com/api/v1/models/${modelId.value}`).then(response => response.json())
-        .then(json => {
-          modelData.value = json
-          return json
-        }).then(() => loading.value = false)
-  }
-
-  return {}
-}
+  primaryModel,
+  primarySFWModelImages,
+  primarySFWModelPreviewImage,
+  primarySFWModelImageCount
+} = civitaiModel
 
 onMounted(() => {
-  fetchModelData()
-  const {
-    pause, resume, isActive
-  } = useIntervalFn(fetchModelData, 10_000)
+  if (refreshEnabled) {
+    const {
+      pause
+    } = useIntervalFn(() => refresh(), 10_000)
+  }
 })
 
 </script>
@@ -83,27 +61,27 @@ onMounted(() => {
 <template>
   <a target="_parent"
      :href="`https://civitai.com/models/${modelId}`"
-     :class="[$style.Embed, {[$style.EmbedLoading]:isInvalid}]">
+     :class="[$style.Embed, {[$style.EmbedLoading]:isFetching}]">
     <div :class="$style.EmbedContent">
       <div :class="$style.PreviewImageWrapper">
         <div :class="$style.PreviewImage">
-          <img alt="Model preview image" :src="primaryModelPreviewImage"/>
+          <img alt="Model preview image" :src="primarySFWModelPreviewImage"/>
         </div>
       </div>
-      <div :class="$style.ModelTypeWrapper">
+      <div :class="$style.ModelTypeWrapper" v-if="!hideType">
         <div :class="$style.ModelType">
           {{ modelType.replace('TextualInversion', 'Embedding') }}
         </div>
       </div>
       <div :class="$style.ModelMeta">
-        <div :class="$style.Uploader">
+        <div :class="$style.Uploader" v-if="!hideUser">
           <div :class="$style.AvatarImage">
             <img alt="User profile image" :src="modelUploaderProfileImage"/>
           </div>
           <div v-text="modelUploader"/>
         </div>
         <div :class="$style.ModelName" v-text="modelName"/>
-        <div :class="$style.ModelStats">
+        <div :class="$style.ModelStats" v-if="!hideStatistics">
           <div :class="$style.StatsWrapper">
             <Rating :rating="modelRating" :ratings="modelRatings"/>
           </div>

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "build:ghpages": "npm run build && shx cp docs/index.html docs/404.html"
   },
   "dependencies": {
     "core-js": "^3.8.3",
@@ -15,6 +16,7 @@
     "@vueuse/core": "^10.3.0"
   },
   "devDependencies": {
+    "shx": "^0.3.4",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-typescript": "~5.0.0",

@@ -4,12 +4,12 @@ import { computed } from 'vue'
 import StarIcon from '@/components/ModelCard/StarIcon.vue'
 
 const props = defineProps<{
-  rating: number,
-  ratings: number
+  rating: number | undefined,
+  ratings: number | undefined
 }>()
 
-const starRating = computed(() => Math.round(props.rating))
-const strRatings = computed(() => props.ratings >= 0 ? props.ratings : 0)
+const starRating = computed(() => Math.round(props.rating ?? 0))
+const strRatings = computed(() => props.ratings ?? 0)
 
 </script>
 

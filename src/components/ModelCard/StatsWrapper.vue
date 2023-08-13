@@ -4,10 +4,10 @@ import * as abbreviate from 'number-abbreviate'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  stat: number
+  stat: Number
 }>()
 
-const computedState = computed(() => abbreviate(props.stat ?? 0))
+const computedState = computed(() => abbreviate(props.stat ?? 0, 1).toString().toLocaleUpperCase())
 
 </script>
 
@@ -17,7 +17,7 @@ const computedState = computed(() => abbreviate(props.stat ?? 0))
       <slot/>
     </div>
     <div>
-      {{ String(abbreviate(stat, 1)).toLocaleUpperCase() }}
+      {{ computedState }}
     </div>
   </div>
 </template>
