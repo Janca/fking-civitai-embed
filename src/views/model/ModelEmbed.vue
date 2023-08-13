@@ -60,7 +60,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <a target="_parent"
+  <a target="_blank"
      :href="`https://civitai.com/models/${modelId}`"
      :class="[$style.Embed, {[$style.EmbedLoading]:isFetching}]">
     <div :class="$style.EmbedContent">
