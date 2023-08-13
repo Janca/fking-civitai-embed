@@ -4,8 +4,9 @@ import { computed, ref, Ref } from 'vue'
 export function useCivitaiModelApi(modelId: Ref<number>, previewImageIndex: Ref<number> = ref(0), immediate: boolean = false) {
     const modelApiRequestUrl = computed(() => {
         const _modelId = modelId.value
-        if (_modelId <= 0) return null
-        else return `https://civitai.com/api/v1/models/${_modelId}`
+        if (_modelId <= 0) {
+            return undefined
+        } else return `https://civitai.com/api/v1/models/${_modelId}`
     })
 
     const {
@@ -17,7 +18,16 @@ export function useCivitaiModelApi(modelId: Ref<number>, previewImageIndex: Ref<
         data: modelData
     } = useFetch<{ data: Ref<object> }>(
         modelApiRequestUrl as Ref<string>,
-        { immediate, refetch: true, timeout: 10_000 }
+        {
+            immediate,
+            refetch: true,
+            timeout: 10_000,
+            async beforeFetch({ url, options, cancel }) {
+                if (url == null) {
+                    cancel()
+                }
+            }
+        }
     ).json()
 
     const modelName = computed(() => modelData.value?.name)

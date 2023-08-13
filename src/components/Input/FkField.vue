@@ -4,13 +4,15 @@ import { computed, useCssModule } from 'vue'
 
 const props = defineProps<{
   label?: String,
-  hoverEffect?: Boolean
+  hoverEffect?: Boolean,
+  focusEffect?: Boolean
 }>()
 
 const computedClasses = computed(() => {
   const style = useCssModule()
   return {
-    [style.FkFieldHoverEnabled]: props.hoverEffect
+    [style.FkFieldHoverEnabled]: props.hoverEffect,
+    [style.FkFieldFocusEnabled]: props.focusEffect
   }
 })
 </script>
@@ -18,7 +20,7 @@ const computedClasses = computed(() => {
 <template>
   <div :class="[$style.FkField, computedClasses]">
     <label :class="[$style.FkFieldLabel]">
-      <span :class="[$style.FkFieldLabelContent]">
+      <span :class="[$style.FkFieldLabelContent]" v-if="$slots.label || props.label">
         <slot name="label">
           {{ props.label }}
         </slot>
@@ -33,19 +35,31 @@ const computedClasses = computed(() => {
 <style lang="scss" module>
 .FkField {
   margin: 0.5rem 0 1rem 0;
+  width: 100%;
 }
 
 .FkFieldHoverEnabled {
   .FkFieldInputContent {
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 
-    &:focus-within, &:hover {
+    &:hover {
+      background: none #25262b;
+    }
+  }
+}
+
+.FkFieldFocusEnabled {
+  .FkFieldInputContent {
+    transition: all 0.3s ease;
+
+    &:focus-within {
       background: none #25262b;
     }
   }
 }
 
 .FkFieldLabel {
+  width: 100%;
   display: block;
 }
 
@@ -57,7 +71,15 @@ const computedClasses = computed(() => {
 }
 
 .FkFieldInputContent {
-  display: block;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+
+  > * {
+    flex: 1 1 auto;
+  }
+
+  width: 100%;
 
   color: #c1c2c5;
 

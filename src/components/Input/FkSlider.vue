@@ -102,6 +102,7 @@ const emit = defineEmits(['update:modelValue'])
   }
 
   &::-webkit-slider-thumb {
+    cursor: pointer;
     background: none #1971c2;
     position: relative;
     -webkit-appearance: none;

@@ -2,7 +2,6 @@ import { computed, isRef, MaybeRef } from 'vue'
 
 export function useBoolean(b: MaybeRef<string | number | boolean | null>, null_true: boolean = true) {
     function bool(a: string | number | boolean | null): boolean {
-        console.log(`bool value: ${a}`)
         if (a === undefined) {
             return false
         } else if (a == null) {

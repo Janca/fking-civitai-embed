@@ -16,6 +16,7 @@ const route = useRoute()
 const modelId = computed(() => parseInt(route.params.modelId as string ?? 0))
 const previewImageIndex = computed(() => parseInt(route.query.image_idx as string ?? 0))
 
+const hideTitle = useBoolean(route.query.hide_title as string | null)
 const hideType = useBoolean(route.query.hide_type as string | null)
 const hideUser = useBoolean(route.query.hide_user as string | null)
 const hideStatistics = useBoolean(route.query.hide_stats as string | null)
@@ -80,7 +81,7 @@ onMounted(() => {
           </div>
           <div v-text="modelUploader"/>
         </div>
-        <div :class="$style.ModelName" v-text="modelName"/>
+        <div :class="$style.ModelName" v-text="modelName" v-if="!hideTitle"/>
         <div :class="$style.ModelStats" v-if="!hideStatistics">
           <div :class="$style.StatsWrapper">
             <Rating :rating="modelRating" :ratings="modelRatings"/>

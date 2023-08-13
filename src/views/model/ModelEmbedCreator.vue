@@ -5,13 +5,19 @@ import Code from '@/components/Code.vue'
 import FkSlider from '@/components/Input/FkSlider.vue'
 import FkTextField from '@/components/Input/FkTextField.vue'
 import { useCivitaiModelApi } from '@/composition/civitai'
+import FkSwitch from '@/components/Input/FkSwitch.vue'
+import FkSwitchGroup from '@/components/Input/FkSwitchGroup.vue'
 
 const width = ref(320)
 const height = ref(412)
 const imageIdxInput = ref(1)
 
-const modelImageMin = ref(1)
-const modelImageMax = ref(1)
+const refreshPeriodically = ref(false)
+
+const hideUser = ref(false)
+const hideTitle = ref(false)
+const hideType = ref(false)
+const hideStats = ref(false)
 
 const embedFrame = ref()
 const modelUrlInput = ref()
@@ -27,12 +33,18 @@ const iframeSrcUrl = computed(() => {
   const _modelId = modelId.value
   const queries = new URLSearchParams({
     image_idx: String(imageIdx.value),
+    hide_user: String(hideUser.value),
+    hide_title: String(hideTitle.value),
+    hide_stats: String(hideStats.value),
+    hide_type: String(hideType.value),
     refresh: '0'
   })
 
   if (_modelId && _modelId >= 1) {
     return `${origin}/${_modelId}?${queries}`
   }
+
+  return undefined
 })
 
 const modelId = computed(() => {
@@ -69,13 +81,12 @@ function copySource() {
         <div style="font-weight:500">
           <p>
             Create an embed directly to your CivitAI model on any website allowing
-            <Code>&lt;iframe&gt;</Code>.
-            <br/>
+            <Code>iframe</Code>.
             Show off your model with an eye-catching, zero-effort card element.
           </p>
           <p>
-            To begin, enter a valid, SFW model URL below. Your preview is show on the right, then use
-            the <Code>Copy source code</Code> button to copy the <Code>iframe</Code> HTML to clipboard.
+            To begin, enter a valid, SFW model URL. Then use the <Code>Copy source code</Code>
+            button to copy the <Code>iframe</Code> HTML to clipboard.
           </p>
         </div>
 
@@ -100,6 +111,28 @@ function copySource() {
                     :step="4" unit="px"
                     value-width="min(72px, max(32px,10%))"
                     v-model="height"/>
+
+          <FkSwitch v-model="refreshPeriodically">
+            Refresh Periodically
+          </FkSwitch>
+
+          <div :class="[$style.HideFeatures]">
+            <h3>Hide Features</h3>
+            <FkSwitchGroup>
+              <FkSwitch v-model="hideUser">
+                Hide User Information
+              </FkSwitch>
+              <FkSwitch v-model="hideTitle">
+                Hide Title Information
+              </FkSwitch>
+              <FkSwitch v-model="hideType">
+                Hide Type Information
+              </FkSwitch>
+              <FkSwitch v-model="hideStats">
+                Hide Statistics
+              </FkSwitch>
+            </FkSwitchGroup>
+          </div>
         </div>
       </div>
     </div>
@@ -130,13 +163,20 @@ function copySource() {
   flex-flow: row nowrap;
   gap: 1rem;
 
-  width: 100%;
   padding: 1rem;
+
+  width: 100%;
+  position: relative;
 }
 
-@media screen and (max-width: 1128px) {
+@media screen and (max-width: 1256px) {
   .EmbedWrapper {
     flex-flow: column nowrap;
+
+    .CreatorSection {
+      top: unset;
+      position: unset;
+    }
   }
 }
 
@@ -150,9 +190,13 @@ function copySource() {
 }
 
 .CreatorSection {
+  top: 1rem;
+  position: sticky;
+
   display: flex;
   flex-flow: column nowrap;
 
+  height: min-content;
   width: 100%;
 }
 
@@ -237,6 +281,16 @@ function copySource() {
 
   &:focus {
     outline: 0.2rem solid rgba(25, 113, 194, 0.3)
+  }
+}
+
+.HideFeatures {
+  h3 {
+    margin-bottom: 0;
+  }
+
+  h3 + * {
+    margin-top: 0;
   }
 }
 </style>
