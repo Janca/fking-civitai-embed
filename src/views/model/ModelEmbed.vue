@@ -53,7 +53,7 @@ onMounted(() => {
   if (refreshEnabled) {
     const {
       pause
-    } = useIntervalFn(() => refresh(), 10_000)
+    } = useIntervalFn(() => refresh(), 120_000)
   }
 })
 
