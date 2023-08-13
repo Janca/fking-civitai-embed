@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 
 import FkField from '@/components/Input/FkField.vue'
+import { computed, Ref, useCssModule } from 'vue'
 
 const props = defineProps<{
   label?: String,
-  modelValue?: Boolean
+  modelValue?: Boolean,
+  disabled?: any
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -13,17 +15,27 @@ function onInput(checked: boolean) {
   emit('update:modelValue', checked)
 }
 
+const computedClasses = computed(() => {
+  const style = useCssModule()
+  return {
+    [style.FkSwitchDisabledActive]: props.disabled
+  }
+})
+
 </script>
 
 <template>
-  <FkField :class="[$style.FkSwitch]" :hover-effect="true">
+  <FkField :class="[$style.FkSwitch, computedClasses]" :hover-effect="true">
     <span :class="[$style.FkSwitchLabel]" v-if="$slots.default || props.label">
       <slot>
         {{ props.label }}
       </slot>
     </span>
     <span :class="[$style.FkSwitchControl]">
-      <input type="checkbox" :checked="modelValue" @input="onInput($event.target.checked)"/>
+      <input type="checkbox"
+             :disabled="disabled"
+             :checked="modelValue"
+             @input="onInput($event.target.checked)"/>
       <span :class="[$style.FkSwitchThumbContainer]">
         <span :class="[$style.FkSwitchThumb]"></span>
       </span>
@@ -56,6 +68,15 @@ function onInput(checked: boolean) {
       transform: translateX(0.9rem);
       background-color: white;
     }
+  }
+}
+
+.FkSwitchDisabledActive {
+  pointer-events: none;
+  cursor: not-allowed;
+
+  .FkSwitchControl, .FkSwitchLabel {
+    opacity: 0.5;
   }
 }
 

@@ -1,7 +1,14 @@
 import { useFetch } from '@vueuse/core'
 import { computed, ref, Ref } from 'vue'
 
-export function useCivitaiModelApi(modelId: Ref<number>, previewImageIndex: Ref<number> = ref(0), immediate: boolean = false) {
+export function useCivitaiModelApi(
+    modelId: Ref<number>,
+    previewImageIndex: Ref<number> = ref(0),
+    versionIndex: Ref<number> = ref(0),
+    showVersionInfo: Ref<boolean> = ref(false),
+    versionStats: Ref<boolean> = ref(false),
+    immediate: boolean = false
+) {
     const modelApiRequestUrl = computed(() => {
         const _modelId = modelId.value
         if (_modelId <= 0) {
@@ -30,23 +37,36 @@ export function useCivitaiModelApi(modelId: Ref<number>, previewImageIndex: Ref<
         }
     ).json()
 
-    const modelName = computed(() => modelData.value?.name)
+    const modelName = computed(() => {
+        const _name = modelData.value?.name
+        if (showVersionInfo.value) {
+            const _versionInfo = primaryModel.value?.name
+            if (_versionInfo != null) {
+                return `${_name} - ${_versionInfo}`
+            }
+        }
+
+        return _name
+    })
 
     const modelUploader = computed(() => modelData.value?.creator?.username)
     const modelUploaderProfileImage = computed(() => modelData.value?.creator?.image)
 
-    const modelVersions = computed(() => modelData.value?.modelVersions)
+    const versions = computed(() => modelData.value?.modelVersions)
+    const modelVersionCount = computed(() => versions.value?.length ?? 0)
 
-    const modelRating = computed(() => modelData.value?.stats.rating ?? -1)
-    const modelRatings = computed(() => modelData.value?.stats.ratingCount ?? 0)
+    const statsTarget = computed(() => versionStats.value ? primaryModel?.value : modelData.value)
 
-    const modelLikes = computed(() => modelData.value?.stats?.favoriteCount ?? 0)
-    const modelComments = computed(() => modelData.value?.stats?.commentCount ?? 0)
-    const modelDownloads = computed(() => modelData.value?.stats?.downloadCount ?? 0)
+    const rating = computed(() => statsTarget.value?.stats.rating ?? -1)
+    const ratings = computed(() => statsTarget.value?.stats.ratingCount ?? 0)
+
+    const likes = computed(() => statsTarget.value?.stats?.favoriteCount ?? 0)
+    const comments = computed(() => statsTarget.value?.stats?.commentCount ?? 0)
+    const downloads = computed(() => statsTarget.value?.stats?.downloadCount ?? 0)
 
     const modelType = computed(() => modelData.value?.type ?? 'UNK')
 
-    const primaryModel = computed(() => modelVersions.value?.[0])
+    const primaryModel = computed(() => versions.value?.[versionIndex.value])
 
     const primaryModelImages: Ref<[any] | undefined> = computed(() => primaryModel.value?.images)
     const primarySFWModelImages = computed(() => primaryModelImages.value?.filter(_image => _image.nsfw == 'None') ?? [])
@@ -62,19 +82,22 @@ export function useCivitaiModelApi(modelId: Ref<number>, previewImageIndex: Ref<
         execute,
         isFetching,
 
+        modelData,
+
         modelName,
         modelType,
 
         modelUploader,
         modelUploaderProfileImage,
 
-        modelVersions,
+        versions,
+        versionCount: modelVersionCount,
 
-        modelRating,
-        modelRatings,
-        modelLikes,
-        modelComments,
-        modelDownloads,
+        rating: rating,
+        ratings: ratings,
+        likes: likes,
+        comments: comments,
+        downloads: downloads,
 
         primaryModel,
         primarySFWModelImages,

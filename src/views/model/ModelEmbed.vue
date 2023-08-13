@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import Rating from '@/components/ModelCard/Rating.vue'
@@ -14,6 +14,7 @@ import { useBoolean } from '@/composition'
 const route = useRoute()
 
 const modelId = computed(() => parseInt(route.params.modelId as string ?? 0))
+const versionIndex = computed(() => parseInt(route.query.version_idx as string ?? 0))
 const previewImageIndex = computed(() => parseInt(route.query.image_idx as string ?? 0))
 
 const hideTitle = useBoolean(route.query.hide_title as string | null)
@@ -22,7 +23,18 @@ const hideUser = useBoolean(route.query.hide_user as string | null)
 const hideStatistics = useBoolean(route.query.hide_stats as string | null)
 const refreshEnabled = useBoolean(route.query.refresh as string | null)
 
-const civitaiModel = useCivitaiModelApi(modelId, previewImageIndex, true)
+const showVersionInfo = useBoolean(route.query.version_info as string | null)
+const versionStats = useBoolean(route.query.version_stats as string | null)
+
+const civitaiModel = useCivitaiModelApi(
+    modelId,
+    previewImageIndex,
+    versionIndex,
+    showVersionInfo,
+    versionStats,
+    true
+)
+
 const {
   error,
   isFetching,
@@ -37,17 +49,21 @@ const {
 
   modelVersions,
 
-  modelRating,
-  modelRatings,
-  modelLikes,
-  modelComments,
-  modelDownloads,
+  rating,
+  ratings,
+  likes,
+  comments,
+  downloads,
 
   primaryModel,
   primarySFWModelImages,
   primarySFWModelPreviewImage,
   primarySFWModelImageCount
 } = civitaiModel
+
+const imageLoading = ref(true)
+
+const loading = computed(() => isFetching.value || imageLoading.value)
 
 onMounted(() => {
   if (refreshEnabled) {
@@ -62,11 +78,14 @@ onMounted(() => {
 <template>
   <a target="_blank"
      :href="`https://civitai.com/models/${modelId}`"
-     :class="[$style.Embed, {[$style.EmbedLoading]:isFetching}]">
+     :class="[$style.Embed, {[$style.EmbedLoading]:loading}]">
     <div :class="$style.EmbedContent">
       <div :class="$style.PreviewImageWrapper">
         <div :class="$style.PreviewImage">
-          <img alt="Model preview image" :src="primarySFWModelPreviewImage"/>
+          <img alt="Model preview image"
+               :src="primarySFWModelPreviewImage"
+               @loadstart="imageLoading = true"
+               @load="imageLoading = false"/>
         </div>
       </div>
       <div :class="$style.ModelTypeWrapper" v-if="!hideType">
@@ -84,16 +103,16 @@ onMounted(() => {
         <div :class="$style.ModelName" v-text="modelName" v-if="!hideTitle"/>
         <div :class="$style.ModelStats" v-if="!hideStatistics">
           <div :class="$style.StatsWrapper">
-            <Rating :rating="modelRating" :ratings="modelRatings"/>
+            <Rating :rating="rating" :ratings="ratings"/>
           </div>
           <div :class="$style.StatsWrapper" style="margin-left: auto">
-            <Likes :likes="modelLikes"/>
+            <Likes :likes="likes"/>
           </div>
           <div :class="$style.StatsWrapper">
-            <Comments :comments="modelComments"/>
+            <Comments :comments="comments"/>
           </div>
           <div :class="$style.StatsWrapper">
-            <Downloads :downloads="modelDownloads"/>
+            <Downloads :downloads="downloads"/>
           </div>
         </div>
       </div>

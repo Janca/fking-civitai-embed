@@ -1,10 +1,13 @@
 <script lang="ts" setup>
 
 import FkField from '@/components/Input/FkField.vue'
+import { computed, Ref, useCssModule } from 'vue'
 
 const props = defineProps<{
   label: String,
   unit?: String,
+
+  disabled?: any,
 
   valueWidth?: String | Number,
 
@@ -17,10 +20,17 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
+const computedClasses = computed(() => {
+  const style = useCssModule()
+  return {
+    [style.SliderDisabledActive]: props.disabled
+  }
+})
+
 </script>
 
 <template>
-  <FkField :label="props.label">
+  <FkField :class="[computedClasses]" :label="props.label">
     <template #label v-if="$slots.label">
       <slot name="label"/>
     </template>
@@ -40,6 +50,14 @@ const emit = defineEmits(['update:modelValue'])
 
 <style lang="scss" module>
 .SliderLabel {
+}
+
+.SliderDisabledActive {
+  pointer-events: none;
+
+  .SliderContent {
+    opacity: 0.5;
+  }
 }
 
 .LabelContent {
@@ -94,7 +112,7 @@ const emit = defineEmits(['update:modelValue'])
     height: 0.3rem;
 
     transition: background-color 0.3s ease;
-    background: none rgb(255, 255, 255, 0.75);
+    background: none rgb(255, 255, 255, 0.5);
   }
 
   &:hover::before {

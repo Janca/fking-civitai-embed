@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { toReactive, useBrowserLocation, useClipboard } from '@vueuse/core'
+import { computed, Ref, ref } from 'vue'
+import { debouncedRef, toReactive, useBrowserLocation, useClipboard } from '@vueuse/core'
 import Code from '@/components/Code.vue'
 import FkSlider from '@/components/Input/FkSlider.vue'
 import FkTextField from '@/components/Input/FkTextField.vue'
@@ -11,6 +11,14 @@ import FkSwitchGroup from '@/components/Input/FkSwitchGroup.vue'
 const width = ref(320)
 const height = ref(412)
 const imageIdxInput = ref(1)
+const versionIdxInput = ref(1)
+
+const showVersionInfo = ref(false)
+const _versionStats = ref(false)
+const versionStats: Ref<boolean> = computed({
+  get: () => _versionStats.value && !hideStats.value,
+  set: (value: boolean) => _versionStats.value = value
+})
 
 const refreshPeriodically = ref(false)
 
@@ -19,8 +27,11 @@ const hideTitle = ref(false)
 const hideType = ref(false)
 const hideStats = ref(false)
 
+const enabledGallery = ref(false)
+
 const embedFrame = ref()
 const modelUrlInput = ref()
+const debouncedUrlInput = debouncedRef(modelUrlInput, 600)
 
 const loading = ref(false)
 
@@ -32,6 +43,9 @@ const {
 const iframeSrcUrl = computed(() => {
   const _modelId = modelId.value
   const queries = new URLSearchParams({
+    version_info: String(showVersionInfo.value),
+    version_stats: String(versionStats.value),
+    version_idx: String(versionIdx.value),
     image_idx: String(imageIdx.value),
     hide_user: String(hideUser.value),
     hide_title: String(hideTitle.value),
@@ -48,15 +62,20 @@ const iframeSrcUrl = computed(() => {
 })
 
 const modelId = computed(() => {
-  const _url: string | undefined = modelUrlInput.value
+  const _url: string | undefined = debouncedUrlInput.value
   return _url ? parseInt(_url.match('https://civitai.com/models/(\\d+)')?.[1] || '-1') : -1
 })
 
 const imageIdx = computed(() => (imageIdxInput.value ?? 1) - 1)
+const versionIdx = computed(() => (versionIdxInput.value ?? 0) - 1)
+
+const civitaiModel = useCivitaiModelApi(modelId)
 
 const {
+  isFetching,
+  versionCount,
   primarySFWModelImageCount
-} = useCivitaiModelApi(modelId)
+} = civitaiModel
 
 const source = ref('')
 const {
@@ -97,40 +116,47 @@ function copySource() {
         </FkTextField>
         <div>
           <h2>Configure</h2>
+          <FkSlider label="Model Version"
+                    :min="1" :max="Math.max(1, versionCount)"
+                    value-width="min(72px, max(32px,10%))"
+                    :disabled="isFetching"
+                    v-model="versionIdxInput"/>
           <FkSlider label="Model Preview Image"
                     :min="1" :max="Math.max(1, primarySFWModelImageCount)"
                     value-width="min(72px, max(32px,10%))"
+                    :disabled="isFetching"
                     v-model="imageIdxInput"/>
           <FkSlider label="Width"
                     :min="128" :max="1024"
                     :step="4" unit="px"
                     value-width="min(72px, max(32px,10%))"
+                    :disabled="isFetching"
                     v-model="width"/>
           <FkSlider label="Height"
                     :min="128" :max="1024"
                     :step="4" unit="px"
                     value-width="min(72px, max(32px,10%))"
+                    :disabled="isFetching"
                     v-model="height"/>
 
-          <FkSwitch v-model="refreshPeriodically">
-            Refresh Periodically
-          </FkSwitch>
+
+          <div :class="[$style.HideFeatures]">
+            <h3>Enabled Features</h3>
+            <FkSwitchGroup>
+              <FkSwitch v-model="refreshPeriodically" :disabled="isFetching" label="Refresh Periodically"/>
+              <FkSwitch v-model="showVersionInfo" :disabled="isFetching" label="Show Version Information"/>
+              <FkSwitch v-model="versionStats" :disabled="hideStats || isFetching" label="Use Version Statistics"/>
+              <!--          <FkSwitch v-model="enabledGallery" label="Image Gallery"/>-->
+            </FkSwitchGroup>
+          </div>
 
           <div :class="[$style.HideFeatures]">
             <h3>Hide Features</h3>
             <FkSwitchGroup>
-              <FkSwitch v-model="hideUser">
-                Hide User Information
-              </FkSwitch>
-              <FkSwitch v-model="hideTitle">
-                Hide Title Information
-              </FkSwitch>
-              <FkSwitch v-model="hideType">
-                Hide Type Information
-              </FkSwitch>
-              <FkSwitch v-model="hideStats">
-                Hide Statistics
-              </FkSwitch>
+              <FkSwitch v-model="hideUser" :disabled="isFetching" label="Hide User Information"/>
+              <FkSwitch v-model="hideTitle" :disabled="isFetching" label="Hide Title Information"/>
+              <FkSwitch v-model="hideType" :disabled="isFetching" label="Hide Type Information"/>
+              <FkSwitch v-model="hideStats" :disabled="isFetching" label="Hide Statistics"/>
             </FkSwitchGroup>
           </div>
         </div>
@@ -187,6 +213,9 @@ function copySource() {
   color: #c1c2c5;
 
   width: 100%;
+
+  margin-left: auto;
+  max-width: 896px;
 }
 
 .CreatorSection {
