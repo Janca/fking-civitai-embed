@@ -1,11 +1,17 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import ModelEmbedCreator from '@/views/model/ModelEmbedCreator.vue'
+import Index from "@/views/Index.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         name: 'home',
         component: ModelEmbedCreator
+    },
+    {
+        path: '/test',
+        name: 'test',
+        component: Index
     },
     {
         path: '/:modelId',

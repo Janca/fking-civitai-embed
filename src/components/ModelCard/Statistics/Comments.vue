@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import StatsWrapper from '@/components/ModelCard/StatsWrapper.vue'
+import StatsWrapper from '@/components/ModelCard/Statistics/FkStat.vue'
 
 const props = defineProps<{
   comments: number | undefined
@@ -9,7 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <StatsWrapper :stat="props.comments ?? 0">
+  <StatsWrapper :stat="props.comments">
     <svg xmlns="http://www.w3.org/2000/svg"
          width="100%"
          height="100%"

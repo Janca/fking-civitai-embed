@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import StatsWrapper from '@/components/ModelCard/StatsWrapper.vue'
+import StatsWrapper from '@/components/ModelCard/Statistics/FkStat.vue'
 
 const props = defineProps<{
   downloads: number | undefined

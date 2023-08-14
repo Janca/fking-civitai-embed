@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 
+import FKModelCard from "@/components/ModelCard/FKModelCard.vue";
+
 </script>
 
 <template>
-  <div>
-    <h1>Hello World</h1>
-  </div>
+  <FKModelCard/>
 </template>
 
 <style lang="scss" module>
