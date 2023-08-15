@@ -12,7 +12,7 @@ $transition-timing-fn: ease;
 $theme-primary: #1971c2;
 $theme-secondary: $theme-primary;
 
-$theme-primary-darker: color.scale($theme-primary, $lightness: -15%);
+$theme-primary-darker: color.scale($theme-primary, $lightness: -25%);
 $theme-secondary-darker: color.scale($theme-secondary, $lightness: -15%);
 
 $theme-primary-lighter: color.scale($theme-primary, $lightness: 15%);

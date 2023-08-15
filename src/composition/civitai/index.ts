@@ -1,11 +1,11 @@
-import {AfterFetchContext, BeforeFetchContext, useFetch} from '@vueuse/core'
-import {computed, ref, Ref, watch} from 'vue'
+import { BeforeFetchContext, ReadonlyRefOrGetter, useFetch } from '@vueuse/core'
+import { computed, isReadonly, isRef, MaybeRef, ref, Ref, WritableComputedRef } from 'vue'
 
 export type CivitaiModel = {
     id: number,
     name: string,
     description: string,
-    type: "Checkpoint" | "TextualInversion" | "Hypernetwork" | "AestheticGradient" | "LORA" | "Controlnet" | "Poses" | string,
+    type: 'Checkpoint' | 'TextualInversion' | 'Hypernetwork' | 'AestheticGradient' | 'LORA' | 'Controlnet' | 'Poses' | string,
     nsfw: boolean,
     tags: string[],
 
@@ -28,7 +28,7 @@ export type CivitaiModel = {
         name: string,
         images: {
             hash: string,
-            nsfw: string | "Soft" | "Mature" | "X" | "None",
+            nsfw: string | 'Soft' | 'Mature' | 'X' | 'None',
             url: string,
             width: number,
             height: number
@@ -41,29 +41,44 @@ export type CivitaiModel = {
     }[]
 }
 
-export function useCivitaiModelApi2(fetchOptions?: { immediate: boolean }) {
-    const modelId = ref(-1)
-
-    const _modelVersionId = ref(-1)
-    const modelVersionId = computed({
-        get: () => _modelVersionId.value,
-        set: (value) => {
-            _selectedVersionIndex.value = getVersionIndexFromId(value)
-            _modelVersionId.value = value
+function writableRef<T = unknown>(_ref: ReadonlyRefOrGetter<T> | MaybeRef<T>): Ref<T> | WritableComputedRef<T> {
+    if (isRef(_ref)) {
+        if (isReadonly(_ref)) {
+            const _r: Ref<T> = ref(_ref.value) as Ref<T>
+            return computed({
+                get: () => _r.value,
+                set: (value) => _r.value = value
+            })
         }
-    })
 
-    function getVersionIdFromIndex(index: number, _v?: CivitaiModel["modelVersions"]): number | -1 {
+        return _ref
+    } else if (_ref instanceof Function) {
+        return writableRef(computed(_ref))
+    } else {
+        return writableRef(() => _ref)
+    }
+}
+
+export function useCivitaiModelApi2(
+    _modelId: Ref<number> = ref(-1),
+    _modelVersionId: Ref<number> = ref(-1),
+    _selectedVersionIndex: Ref<number> = ref(-1),
+    _selectedModelVersionPreviewImageIndex: Ref<number> = ref(-1),
+    fetchOptions?: { immediate: boolean }
+) {
+    const modelId: Ref<number> = writableRef(_modelId)
+    const modelVersionId: Ref<number> = writableRef(_modelId)
+
+    function getVersionIdFromIndex(index: number, _v?: CivitaiModel['modelVersions']): number | -1 {
         const _versions = _v ?? versions.value
         return index >= 0 ? _versions?.[index]?.id ?? -1 : -1
     }
 
-    function getVersionIndexFromId(id: number, _v?: CivitaiModel["modelVersions"]): number | -1 {
+    function getVersionIndexFromId(id: number, _v?: CivitaiModel['modelVersions']): number | -1 {
         const _versions = _v ?? versions.value
         return id > 0 ? _versions?.findIndex(it => it.id == id) ?? -1 : -1
     }
 
-    const _selectedVersionIndex = ref(-1)
     const selectedVersionIndex = computed({
         get: () => _selectedVersionIndex.value,
         set: (value) => {
@@ -75,14 +90,12 @@ export function useCivitaiModelApi2(fetchOptions?: { immediate: boolean }) {
         }
     })
 
-    const selectedModelVersionPreviewImageIndex = ref(-1)
-
     const modelApiUrl = computed(() => {
-        const _modelId = modelId.value
-        return (_modelId ? _modelId > 0 ? `https://civitai.com/api/v1/models/${_modelId}` : null : null) as string
+        const _mid = _modelId.value
+        return (_mid ? _mid > 0 ? `https://civitai.com/api/v1/models/${_mid}` : null : null) as string
     })
 
-    function cancelInvalidRequest({url, options, cancel}: BeforeFetchContext) {
+    function cancelInvalidRequest({ url, options, cancel }: BeforeFetchContext) {
         if (url == null) {
             cancel()
         }
@@ -104,34 +117,8 @@ export function useCivitaiModelApi2(fetchOptions?: { immediate: boolean }) {
         beforeFetch: cancelInvalidRequest
     }).json<CivitaiModel>()
 
-    watch(data, () => {
-        const _versions = versions.value
-
-        const _versionId = _modelVersionId.value
-        const _versionIdx = _selectedVersionIndex.value
-
-        let selectedVersionIndex = getVersionIndexFromId(_versionId, _versions)
-
-        if (selectedVersionIndex != -1) {
-            _modelVersionId.value = _versionId
-            _selectedVersionIndex.value = selectedVersionIndex
-        } else {
-            const modelVersionId = getVersionIdFromIndex(_versionIdx, _versions)
-
-            if (modelVersionId != -1) {
-                _modelVersionId.value = modelVersionId
-                _selectedVersionIndex.value = _versionIdx
-            } else {
-                _modelVersionId.value = getVersionIdFromIndex(0, _versions)
-                _selectedVersionIndex.value = 0
-            }
-        }
-
-        const _selectedModelPreviewImageCount = selectedModelVersionImageCount.value
-        const _selectedModelPreviewImageIndex = selectedModelVersionPreviewImageIndex.value
-
-        selectedModelVersionPreviewImageIndex.value = Math.max(0, Math.min(_selectedModelPreviewImageIndex, _selectedModelPreviewImageCount - 1))
-    })
+    const isErroneous = computed(() => error == null)
+    const isValid = computed(() => data.value != null && !isErroneous.value)
 
     const name = computed(() => data.value?.name)
 
@@ -162,30 +149,35 @@ export function useCivitaiModelApi2(fetchOptions?: { immediate: boolean }) {
     const downloads = computed(() => data.value?.stats.downloadCount)
 
     const selectedModelVersion = computed(() => data.value?.modelVersions?.[_selectedVersionIndex.value])
-    const selectedModelVersionImages = computed(() => selectedModelVersion.value?.images.filter(it => it.nsfw == "Soft" || it.nsfw == "None"))
+    const selectedModelVersionImages = computed(() => selectedModelVersion.value?.images.filter(it => it.nsfw == 'Soft' || it.nsfw == 'None'))
     const selectedModelVersionImageCount = computed(() => selectedModelVersionImages.value?.length ?? 0)
 
     const selectedModelVersionRating = computed(() => selectedModelVersion.value?.stats.rating)
     const selectedModelVersionRatings = computed(() => selectedModelVersion.value?.stats.ratingCount)
     const selectedModelVersionDownloads = computed(() => selectedModelVersion.value?.stats.downloadCount ?? 0)
 
-    const selectedModelVersionPreviewImageUrl = computed(() => selectedModelVersionImages.value?.[selectedModelVersionPreviewImageIndex.value]?.url?.replace(/\/width=\d+/, ''))
+    const selectedModelVersionPreviewImageUrl = computed(() => selectedModelVersionImages.value?.[_selectedModelVersionPreviewImageIndex.value]?.url?.replace(/\/width=\d+/, ''))
 
     const selectedModelVersionCivitaiUrl = computed(() => {
-        const _modelId = modelId.value
+        const _mid = _modelId.value
         const _selectedModelVersionId = modelVersionId.value
 
-        const civitaiUrl = `https://civitai.com/models/${_modelId}`
-        return _selectedModelVersionId > 0 ? `${civitaiUrl}?modelVersionId=${_selectedModelVersionId}` : civitaiUrl;
+        const civitaiUrl = `https://civitai.com/models/${_mid}`
+        return _selectedModelVersionId > 0 ? `${civitaiUrl}?modelVersionId=${_selectedModelVersionId}` : civitaiUrl
     })
 
     return {
         abort,
         canAbort,
+
         execute,
         isFetching,
+
         error,
+        isErroneous,
+
         data,
+        isValid,
 
         modelId,
         modelVersionId,
@@ -213,7 +205,7 @@ export function useCivitaiModelApi2(fetchOptions?: { immediate: boolean }) {
         selectedModelVersionDownloads,
         selectedModelVersionImages,
 
-        selectedModelVersionPreviewImageIndex,
+        selectedModelVersionPreviewImageIndex: _selectedModelVersionPreviewImageIndex,
         selectedModelVersionPreviewImageUrl
     }
 }
@@ -246,7 +238,7 @@ export function useCivitaiModelApi(
             immediate,
             refetch: true,
             timeout: 10_000,
-            beforeFetch({url, options, cancel}) {
+            beforeFetch({ url, options, cancel }) {
                 if (url == null) {
                     cancel()
                 }
@@ -290,6 +282,8 @@ export function useCivitaiModelApi(
 
     const selectedModelPreviewImageUrl = computed(() => selectedModelImages.value?.[selectedModelPreviewImageIndex.value]?.url?.replace(/\/width=\d+/, ''))
 
+    const isValid = computed(() => data.value != null)
+
     return {
         abort,
         canAbort,
@@ -300,6 +294,7 @@ export function useCivitaiModelApi(
         isFetching,
 
         data,
+        isValid,
 
         name,
         type,
