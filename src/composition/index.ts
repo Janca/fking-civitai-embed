@@ -1,29 +1,38 @@
-import { computed, isRef, MaybeRef, ref } from 'vue'
-import { get } from '@/composition/maybeRef'
+import {computed, isRef, MaybeRef, Ref, ref} from 'vue'
+import {get} from '@/composition/maybeRef'
 
-export function useBoolean(b: MaybeRef, null_true: boolean = true) {
-    function bool(a: string | number | boolean | null): boolean {
+type UseBooleanRef = {
+    nullIsTrue?: boolean
+}
+
+export function useBooleanRef(b: MaybeRef, init?: UseBooleanRef) {
+    const {
+        nullIsTrue = false
+    } = init ?? {}
+
+    console.log('construction new boolean ref', b, nullIsTrue)
+
+    function bool(a: string | number | boolean | null | undefined): boolean {
         if (a === undefined) {
             return false
         } else if (a == null) {
-            return null_true
+            return nullIsTrue
         } else if (typeof a == 'string') {
             a = a.toLowerCase()
-            if (a == 'true') {
-                return true
-            } else if (a == 'false') {
-                return false
-            } else {
-                a = parseInt(a)
-                console.log('checking refresh as int', a)
-                return bool(a)
-            }
+            if (a === 'true') return true
+            if (a === 'false') return false
+            a = parseInt(a)
         }
 
+        console.log('bool', a)
         return Boolean(a)
     }
 
-    return computed(() => bool(isRef(b) ? b.value : b))
+    const _b = useRef(b)
+    return computed({
+        get: () => bool(_b.value),
+        set: (value: boolean | string | undefined | null) => _b.value = bool(value)
+    })
 }
 
 export function useNumberAbbreviation(
@@ -63,6 +72,15 @@ export function useNumberAbbreviation(
     })
 }
 
+export function useRef<T = unknown>(_ref: MaybeRef<T>): Ref<T> {
+    if (_ref && isRef(_ref)) {
+        console.log('_ref is ref', _ref)
+        return _ref
+    }
+
+    return ref(_ref as T) as Ref<T>
+}
+
 export function useAsInt(_number: MaybeRef<number | string | undefined>, defaultValue?: number) {
     function int(a: string | number) {
         if (typeof a === 'string') {
@@ -94,7 +112,7 @@ export function coercedRef(
     min: MaybeRef<number>,
     max: MaybeRef<number>
 ) {
-    const _coerced = ref(initialValue)
+    const _coerced = useRef(initialValue)
 
     const coerce = (v: number): number => Math.max(get(min), Math.min(v, get(max)))
     return computed({

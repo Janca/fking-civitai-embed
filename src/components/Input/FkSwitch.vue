@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 import FkField from '@/components/Input/FkField.vue'
-import { computed, Ref, useCssModule } from 'vue'
+import {computed, Ref, useCssModule} from 'vue'
 
 const props = defineProps<{
   label?: String,
@@ -45,7 +45,6 @@ const computedClasses = computed(() => {
 
 <style lang="scss" module>
 .FkSwitch {
-  cursor: pointer;
   position: relative;
 
   margin: 2rem 0 1rem 0;
@@ -57,7 +56,7 @@ const computedClasses = computed(() => {
 
   width: 100%;
 
-  label {
+  > * {
     cursor: pointer;
   }
 
@@ -65,7 +64,7 @@ const computedClasses = computed(() => {
     background-color: #1971c2;
 
     .FkSwitchThumb {
-      transform: translateX(1rem);
+      transform: translateX(26px * 0.75);
       background-color: white;
     }
   }
@@ -83,6 +82,7 @@ const computedClasses = computed(() => {
 .FkSwitchLabel {
   font-size: 1rem;
   font-weight: 500;
+  width: 100%;
 }
 
 .FkSwitchControl {
@@ -103,27 +103,39 @@ const computedClasses = computed(() => {
 
   right: 0;
 
-  width: 2.6rem;
-  height: 1.6rem;
+  width: 26px * 1.75;
+  height: 26px;
+
+  padding: 0 2px;
 
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1.6rem; // 0.25rem;
+  border-radius: 26px; // 0.25rem;
 
   background-color: #141517;
   transition: background-color 0.3s ease;
+
+
+  &:hover {
+    .FkSwitchThumb {
+      background-color: white;
+    }
+  }
 }
 
 .FkSwitchThumb {
   display: block;
 
-  width: 1.2rem;
-  height: 1.2rem;
-
-  margin: 0 0.15rem;
+  width: 20px;
+  height: 20px;
 
   border-radius: 50%; // 0.2rem;
   background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid transparent;
 
   transition: all 0.3s ease;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.75) !important;
+  }
 }
 </style>

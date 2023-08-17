@@ -9,7 +9,7 @@ import Comments from '@/components/ModelCard/Statistics/Comments.vue'
 import Downloads from '@/components/ModelCard/Statistics/Downloads.vue'
 import { useCivitaiModelApi } from '@/composition/civitai/_index'
 import { useIntervalFn } from '@vueuse/core'
-import { useBoolean } from '@/composition'
+import { useBooleanRef } from '@/composition'
 
 const route = useRoute()
 
@@ -19,15 +19,15 @@ const previewImageIndex = computed(() => parseInt(route.query.image_idx as strin
 const uiScale = computed(() => parseFloat(route.query.meta_scale as string ?? '1.0'))
 const uiInactiveAlpha = computed(() => parseFloat(route.query.inactive_ui_alpha as string ?? '1.0'))
 
-const hideTitle = useBoolean(route.query.hide_title as string | null)
-const hideType = useBoolean(route.query.hide_type as string | null)
-const hideUser = useBoolean(route.query.hide_user as string | null)
-const hideStatistics = useBoolean(route.query.hide_stats as string | null)
-const refreshEnabled = useBoolean(route.query.refresh as string | null)
-const reducedMotion = useBoolean(route.query.reduced_motion as string | null)
+const hideTitle = useBooleanRef(route.query.hide_title as string | null)
+const hideType = useBooleanRef(route.query.hide_type as string | null)
+const hideUser = useBooleanRef(route.query.hide_user as string | null)
+const hideStatistics = useBooleanRef(route.query.hide_stats as string | null)
+const refreshEnabled = useBooleanRef(route.query.refresh as string | null)
+const reducedMotion = useBooleanRef(route.query.reduced_motion as string | null)
 
-const showVersionInfo = useBoolean(route.query.version_info as string | null)
-const versionStats = useBoolean(route.query.version_stats as string | null)
+const showVersionInfo = useBooleanRef(route.query.version_info as string | null)
+const versionStats = useBooleanRef(route.query.version_stats as string | null)
 
 const civitaiModel = useCivitaiModelApi(
     modelId,

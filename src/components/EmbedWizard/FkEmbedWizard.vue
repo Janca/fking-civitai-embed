@@ -2,6 +2,9 @@
 
 import FkBasicCard from '@/components/FkBasicCard.vue'
 import FkLogotype from '@/components/FkLogotype.vue'
+
+
+
 </script>
 
 <template>
@@ -34,9 +37,6 @@ import FkLogotype from '@/components/FkLogotype.vue'
 
   width: 100%;
   height: 100%;
-
-  padding: 1rem;
-  overflow-y: scroll;
 }
 
 .FkEmbedWizardContent {
@@ -52,11 +52,14 @@ import FkLogotype from '@/components/FkLogotype.vue'
   grid-template-columns: minmax(320px, 640px) minmax(960px, 1fr);
 
   gap: 1rem;
+  padding: 1rem;
 
   height: 100%;
 
   width: 100%;
   max-width: 1920px;
+
+  overflow-y: scroll;
 }
 
 @media screen and (max-width: 1348px) {

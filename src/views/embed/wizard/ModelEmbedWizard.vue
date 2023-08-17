@@ -3,11 +3,12 @@ import FkCode from '@/components/FkCode.vue'
 import FkEmbedWizard from '@/components/EmbedWizard/FkEmbedWizard.vue'
 import FkTextField from '@/components/Input/FkTextField.vue'
 import FkSlider from '@/components/Input/FkSlider.vue'
-import { coercedRef } from '@/composition'
-import { useCivitaiModel } from '@/composition/civitai'
-import { toRefs } from 'vue'
+import {coercedRef} from '@/composition'
+import {useCivitaiModel, useCivitaiModelEmbed} from '@/composition/civitai'
+import {toRefs} from 'vue'
 import FkSwitch from '@/components/Input/FkSwitch.vue'
 import FkSwitchGroup from '@/components/Input/FkSwitchGroup.vue'
+import FkImage from "@/components/FkImage.vue";
 
 const inputSliderWidth = coercedRef(320, 128, 1024)
 const inputSliderHeight = coercedRef(412, 128, 1024)
@@ -15,12 +16,19 @@ const inputSliderHeight = coercedRef(412, 128, 1024)
 const inputSliderModelVersionIndex = coercedRef(0, 0, Number.MAX_SAFE_INTEGER)
 const inputSliderModelPreviewImageIndex = coercedRef(0, 0, Number.MAX_SAFE_INTEGER)
 
-const civitaiModel = useCivitaiModel({ modelId: 2107, selectedModelVersionIndex: inputSliderModelVersionIndex })
+const inputSliderUIScale = coercedRef(1.0, 0.25, 2.0)
+const inputSliderInactiveUIOpacity = coercedRef(1.0, 0.0, 1.0)
+
+const civitaiModelEmbed = useCivitaiModelEmbed({
+  modelId: 2107,
+  selectedModelVersionIndex: inputSliderModelVersionIndex,
+  selectedModelPreviewImageIndex: inputSliderModelPreviewImageIndex
+})
 
 const {
   modelId,
-  modelApiRequestUrl
-} = toRefs(civitaiModel)
+  selectedPreviewImageUrl
+} = civitaiModelEmbed
 
 </script>
 
@@ -73,12 +81,12 @@ const {
                   unit="px" label="Height"/>
       </div>
       <div :class="[$style.ModelEmbedWizardFormConfigurationSection]">
-        <h3>Enable Features</h3>
-        <FkSwitchGroup>
-          <FkSwitch label="Refresh Periodically"/>
-          <FkSwitch label="Show Version Information"/>
-          <FkSwitch label="Use Version Statistics"/>
-        </FkSwitchGroup>
+        <FkSlider v-model="inputSliderUIScale"
+                  :min="0.25" :max="2.0" :step="0.05"
+                  label="UI Scale"/>
+        <FkSlider v-model="inputSliderInactiveUIOpacity"
+                  :min="0.0" :max="1.0" :step="0.05"
+                  label="UI Inactive Opacity"/>
       </div>
       <div :class="[$style.ModelEmbedWizardFormConfigurationSection]">
         <h3>Enable Features</h3>
@@ -89,11 +97,12 @@ const {
         </FkSwitchGroup>
       </div>
       <div :class="[$style.ModelEmbedWizardFormConfigurationSection]">
-        <h3>Enable Features</h3>
+        <h3>Hide Features</h3>
         <FkSwitchGroup>
-          <FkSwitch label="Refresh Periodically"/>
-          <FkSwitch label="Show Version Information"/>
-          <FkSwitch label="Use Version Statistics"/>
+          <FkSwitch label="Hide Statistics"/>
+          <FkSwitch label="Hide Title"/>
+          <FkSwitch label="Hide Type"/>
+          <FkSwitch label="Hide User"/>
         </FkSwitchGroup>
       </div>
       <div :class="[$style.ModelEmbedWizardFormConfigurationSection]">
