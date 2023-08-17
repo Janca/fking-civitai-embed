@@ -7,7 +7,7 @@ import Rating from '@/components/ModelCard/Statistics/Rating.vue'
 import Likes from '@/components/ModelCard/Statistics/Likes.vue'
 import Comments from '@/components/ModelCard/Statistics/Comments.vue'
 import Downloads from '@/components/ModelCard/Statistics/Downloads.vue'
-import { useCivitaiModelApi } from '@/composition/civitai'
+import { useCivitaiModelApi } from '@/composition/civitai/_index'
 import { useIntervalFn } from '@vueuse/core'
 import { useBoolean } from '@/composition'
 

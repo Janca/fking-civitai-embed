@@ -1,5 +1,11 @@
 @use "variables" as v;
 
+/*
+ * REGEX:
+ * F: (\$(.+?)):.
+ * R: $1: var(--$2, v.$1);
+ */
+
 $font-family-body: var(--font-family-body, v.$font-family-body);
 $font-family-mono: var(--font-family-mono, v.$font-family-mono);
 
@@ -17,3 +23,17 @@ $theme-secondary-darker: var(--theme-secondary-darker, v.$theme-secondary-darker
 
 $theme-primary-lighter: var(--theme-primary-lighter, v.$theme-primary-lighter);
 $theme-secondary-lighter: var(--theme-secondary-lighter, v.$theme-secondary-lighter);
+
+$theme-body-text: var(--theme-body-text, v.$theme-body-text);
+$theme-secondary-text: var(--theme-secondary-text, v.$theme-secondary-text);
+
+$theme-control-text: var(--theme-control-text, v.$theme-control-text);
+$theme-control-foreground: var(--theme-control-foreground, v.$theme-control-foreground);
+
+$theme-body-background: var(--theme-body-background, v.$theme-body-background);
+
+$theme-card-background: var(--theme-card-background, v.$theme-card-background);
+$theme-card-background-lighter: var(--theme-card-background-lighter, v.$theme-card-background-lighter);
+$theme-card-background-transparent: var(--theme-card-background, v.$theme-card-background-transparent);
+
+$theme-focus-ring: var(--theme-focus-ring, v.$theme-focus-ring);

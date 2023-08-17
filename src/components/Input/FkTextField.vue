@@ -16,16 +16,22 @@ function onInput(value: any) {
 </script>
 
 <template>
-  <FkField :label="props.label" :hover-effect="true" :focus-effect="true">
-    <template v-if="$slots.label" #label>
-      <slot name="label"/>
+  <FkField :class="[$style.FkTextFieldInput]" :label="props.label" :hover-effect="true" :focus-effect="true">
+    <template v-if="$slots.default" #label>
+      <slot/>
     </template>
-    <input :class="[$style.FkTextFieldInput]" type="text" @input="onInput($event.target.value)"/>
+    <input type="text" @input="onInput($event.target.value)"/>
   </FkField>
 </template>
 
 <style lang="scss" module>
 .FkTextFieldInput {
-  font-weight: 500;
+  label span:nth-child(2) {
+    padding: 0 0.25rem;
+  }
+
+  input {
+    font-weight: 500;
+  }
 }
 </style>

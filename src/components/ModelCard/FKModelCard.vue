@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import { useCivitaiModelApi2 } from '@/composition/civitai'
-import { computed, ref, useCssModule, watch } from 'vue'
+import { useCivitaiModelApi2 } from '@/composition/civitai/_index'
+import { computed, nextTick, ref, useCssModule, watch } from 'vue'
 import FkModelStatistics from '@/components/ModelCard/Statistics/FkModelStatistics.vue'
 
 const props = withDefaults(
@@ -25,6 +25,8 @@ const {
   isFetching,
   isErroneous,
   isValid,
+
+  execute: refresh,
 
   modelId,
   modelVersionId,
@@ -64,7 +66,7 @@ const computedClasses = computed(() => {
   }
 })
 
-watch(() => props, () => {
+watch(props, () => {
   modelId.value = props.modelId
   modelVersionId.value = props.modelVersionId
 

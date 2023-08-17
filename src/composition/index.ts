@@ -1,5 +1,5 @@
-import {computed, isRef, MaybeRef, MaybeRefOrGetter, toRef} from 'vue'
-import {get} from "@vueuse/core";
+import { computed, isRef, MaybeRef, ref } from 'vue'
+import { get } from '@/composition/maybeRef'
 
 export function useBoolean(b: MaybeRef, null_true: boolean = true) {
     function bool(a: string | number | boolean | null): boolean {
@@ -60,5 +60,45 @@ export function useNumberAbbreviation(
 
         const _a = abbreviate(_n, _d)
         return _u ? _a.toUpperCase() : _a
+    })
+}
+
+export function useAsInt(_number: MaybeRef<number | string | undefined>, defaultValue?: number) {
+    function int(a: string | number) {
+        if (typeof a === 'string') {
+            return parseInt(a)
+        }
+
+        return a
+    }
+
+    return computed({
+        get: () => {
+            const _num = _number ? isRef(_number) ? _number.value : _number : defaultValue
+            return _num ? int(_num) : defaultValue
+        },
+        set: (value: number | string | undefined) => {
+            const _value = value ? int(value) : undefined
+            console.log('setting', value)
+            if (isRef(_number)) {
+                _number.value = _value
+            } else {
+                _number = _value
+            }
+        }
+    })
+}
+
+export function coercedRef(
+    initialValue: MaybeRef<number>,
+    min: MaybeRef<number>,
+    max: MaybeRef<number>
+) {
+    const _coerced = ref(initialValue)
+
+    const coerce = (v: number): number => Math.max(get(min), Math.min(v, get(max)))
+    return computed({
+        get: () => coerce(_coerced.value),
+        set: (value) => _coerced.value = coerce(value)
     })
 }

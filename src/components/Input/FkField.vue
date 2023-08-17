@@ -33,6 +33,8 @@ const computedClasses = computed(() => {
 </template>
 
 <style lang="scss" module>
+@use 'src/styles/css-variables' as v;
+
 .FkField {
   margin: 0.5rem 0 1rem 0;
   width: 100%;
@@ -40,20 +42,16 @@ const computedClasses = computed(() => {
 
 .FkFieldHoverEnabled {
   .FkFieldInputContent {
-    transition: all 0.3s ease;
-
     &:hover {
-      background: none #25262b;
+      background: none v.$theme-card-background-lighter;
     }
   }
 }
 
 .FkFieldFocusEnabled {
   .FkFieldInputContent {
-    transition: all 0.3s ease;
-
     &:focus-within {
-      background: none #25262b;
+      background: none v.$theme-card-background-lighter;
     }
   }
 }
@@ -67,7 +65,7 @@ const computedClasses = computed(() => {
   display: block;
 
   font-weight: 700;
-  font-size: 1.125rem;
+  font-size: 1.135rem;
 }
 
 .FkFieldInputContent {
@@ -81,15 +79,18 @@ const computedClasses = computed(() => {
 
   width: 100%;
 
-  color: #c1c2c5;
+  color: v.$theme-body-text;
 
   padding: 0 0.5rem;
 
   border-radius: 0.25rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
 
-  background: none #1a1b1e;
-  transition: background-color 0.3s ease;
+  background: none v.$theme-card-background;
+
+  transition-duration: v.$transition-duration;
+  transition-timing-function: v.$transition-timing-fn;
+  transition-property: background-color, outline-color, outline-width;
 
   input {
     margin: 0;
@@ -102,6 +103,7 @@ const computedClasses = computed(() => {
 
     width: 100%;
     height: 2rem;
+    font-weight: 500;
 
     -webkit-appearance: none;
   }

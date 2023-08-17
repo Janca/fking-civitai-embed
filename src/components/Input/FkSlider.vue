@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 import FkField from '@/components/Input/FkField.vue'
-import { computed, Ref, useCssModule } from 'vue'
+import { computed, useCssModule } from 'vue'
 
 const props = defineProps<{
   label: String,
@@ -39,9 +39,9 @@ const computedClasses = computed(() => {
              :class="[$style.Slider]"
              :min="props.min" :max="props.max"
              :step="props.step"
-             :value="modelValue"
+             :value="props.modelValue"
              @input="emit('update:modelValue', $event.target.value)"/>
-      <span :class="[$style.SliderValue]" :style="{'width':valueWidth}">
+      <span v-if="props.modelValue != null" :class="[$style.SliderValue]" :style="{'width':valueWidth}">
         {{ modelValue }}{{ unit }}
       </span>
     </span>
@@ -75,12 +75,13 @@ const computedClasses = computed(() => {
 }
 
 .SliderValue {
-  padding: 0 0.125rem;
+  padding: 0 0.25rem 0 0.5rem;
 
   font-weight: 500;
   font-size: 0.8rem;
 
   text-align: right;
+  min-width: max(8ch, 5%);
 
   font-family: SFMono-Regular, Menlo, Monaco,
   Consolas, "Liberation Mono",
@@ -132,11 +133,12 @@ const computedClasses = computed(() => {
     transition: all 0.3s ease;
 
     &:hover {
-      transform: scale(1.15);
+      transform: scale(1.25);
       background-color: #1c7ed9;
     }
 
     &:active {
+      transform: scale(1.15);
       background-color: #1767b3;
     }
 

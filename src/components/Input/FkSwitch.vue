@@ -65,7 +65,7 @@ const computedClasses = computed(() => {
     background-color: #1971c2;
 
     .FkSwitchThumb {
-      transform: translateX(0.9rem);
+      transform: translateX(1rem);
       background-color: white;
     }
   }
@@ -107,7 +107,7 @@ const computedClasses = computed(() => {
   height: 1.6rem;
 
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.25rem;
+  border-radius: 1.6rem; // 0.25rem;
 
   background-color: #141517;
   transition: background-color 0.3s ease;
@@ -119,9 +119,9 @@ const computedClasses = computed(() => {
   width: 1.2rem;
   height: 1.2rem;
 
-  margin: 0 0.2rem;
+  margin: 0 0.15rem;
 
-  border-radius: 0.2rem;
+  border-radius: 50%; // 0.2rem;
   background-color: rgba(255, 255, 255, 0.5);
 
   transition: all 0.3s ease;

@@ -7,7 +7,5 @@ import '@/styles/main.scss'
 </template>
 
 <style lang="scss">
-body {
-  background-color: #141517;
-}
+
 </style>

@@ -3,10 +3,10 @@ import { computed, onMounted, Ref, ref, watch } from 'vue'
 import { debouncedRef, toReactive, useBrowserLocation, useClipboard } from '@vueuse/core'
 import FkSlider from '@/components/Input/FkSlider.vue'
 import FkTextField from '@/components/Input/FkTextField.vue'
-import { useCivitaiModelApi } from '@/composition/civitai'
+import { useCivitaiModelApi } from '@/composition/civitai/_index'
 import FkSwitch from '@/components/Input/FkSwitch.vue'
 import FkSwitchGroup from '@/components/Input/FkSwitchGroup.vue'
-import Code from '@/components/Code.vue'
+import Code from '@/components/FkCode.vue'
 
 const width = ref(320)
 const height = ref(412)

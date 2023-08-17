@@ -8,6 +8,9 @@ html, html body {
   -moz-osx-font-smoothing: grayscale;
 
   line-height: 1.55;
+
+  color: v.$theme-body-text;
+  background-color: v.$theme-body-background;
 }
 
 *, *::before, *::after {

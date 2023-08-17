@@ -10,10 +10,24 @@ $transition-duration: 0.3s;
 $transition-timing-fn: ease;
 
 $theme-primary: #1971c2;
-$theme-secondary: $theme-primary;
+$theme-secondary: #c2198c;
 
 $theme-primary-darker: color.scale($theme-primary, $lightness: -25%);
 $theme-secondary-darker: color.scale($theme-secondary, $lightness: -15%);
 
 $theme-primary-lighter: color.scale($theme-primary, $lightness: 15%);
 $theme-secondary-lighter: color.scale($theme-secondary, $lightness: 15%);
+
+$theme-body-text: #c1c2c5;
+$theme-secondary-text: color.scale($theme-body-text, $lightness: -30%);
+
+$theme-control-text: white;
+$theme-control-foreground: $theme-control-text;
+
+$theme-body-background: #141517;
+
+$theme-card-background: color.scale($theme-body-background, $lightness: 3%);
+$theme-card-background-lighter: color.scale($theme-card-background, $lightness: 5%);
+$theme-card-background-transparent: color.adjust($theme-card-background, $alpha: -0.5);
+
+$theme-focus-ring: 0.12rem solid color.adjust($theme-primary, $alpha: -0.65);

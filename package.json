@@ -8,6 +8,7 @@
     "build:ghpages": "npm run build && shx cp docs/index.html docs/404.html"
   },
   "dependencies": {
+    "pinia": "^2.1.6",
     "@vueuse/core": "^10.3.0",
     "core-js": "^3.8.3",
     "dot-prop": "^8.0.2",

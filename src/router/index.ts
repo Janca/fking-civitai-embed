@@ -1,6 +1,7 @@
-import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import ModelEmbedCreator from '@/views/model/ModelEmbedCreator.vue'
-import Index from "@/views/Index.vue";
+import Index from '@/views/Index.vue'
+import ModelEmbedWizard from '@/views/embed/wizard/ModelEmbedWizard.vue'
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -9,15 +10,26 @@ const routes: Array<RouteRecordRaw> = [
         component: ModelEmbedCreator
     },
     {
+        path: '/wizard',
+        alias: '/wizard/model',
+        name: 'wizard-embed',
+        component: ModelEmbedWizard
+    },
+    {
         path: '/test',
         name: 'test',
         component: Index
     },
     {
-        path: '/:modelId',
+        path: '/test/:modelId',
         name: 'embed-model',
-        component: () => import('@/views/model/ModelEmbed.vue')
+        component: () => import('@/views/model/ModelEmbed2.vue')
     }
+    // {
+    //     path: '/:modelId',
+    //     name: 'embed-model',
+    //     component: () => import('@/views/model/ModelEmbed2.vue')
+    // }
     /*  {
         path: '/about',
         name: 'about',
